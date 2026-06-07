@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.angular/
+
+# Env files with secrets
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db

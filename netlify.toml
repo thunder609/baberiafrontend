@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback para rutas del admin (ej: /admin/appointments)
+[[redirects]]
+  from = "/admin/*"
+  to = "/admin/index.html"
+  status = 200

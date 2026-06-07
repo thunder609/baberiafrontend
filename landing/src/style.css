@@ -1,0 +1,289 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+  --color-barber-dark: #1c1917;
+  --color-barber-accent: #d97706;
+  --color-barber-gold: #b8860b;
+  --color-barber-cream: #faf6f1;
+  --color-barber-muted: #78716c;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hero pattern overlay */
+.hero-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(28, 25, 23, 0.92) 0%,
+    rgba(28, 25, 23, 0.7) 50%,
+    rgba(28, 25, 23, 0.92) 100%
+  );
+}
+
+/* Stripe pattern for barber pole effect */
+.barber-stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(217, 119, 6, 0.05) 20px,
+    rgba(217, 119, 6, 0.05) 40px
+  );
+}
+
+/* Classic divider */
+.divider {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-barber-accent),
+    transparent
+  );
+  width: 120px;
+  margin: 0 auto;
+}
+
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fade-in-up-delay {
+  animation: fadeInUp 0.6s ease-out 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-up-delay-2 {
+  animation: fadeInUp 0.6s ease-out 0.4s forwards;
+  opacity: 0;
+}
+
+/* Booking step transitions */
+.booking-step {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.booking-step-enter {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.booking-step-active {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Time slot grid */
+.time-slot {
+  transition: all 0.15s ease;
+}
+
+.time-slot:hover:not(.time-slot--taken) {
+  transform: translateY(-1px);
+}
+
+.time-slot--selected {
+  ring: 2px solid var(--color-barber-accent);
+  background-color: #fef3c7;
+}
+
+.time-slot--taken {
+  opacity: 0.4;
+  cursor: not-allowed;
+  text-decoration: line-through;
+}
+
+/* Glassmorphism card */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ─── STEP INDICATOR ──────────────────────────────────────── */
+#steps-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  border: 2px solid #d6d3d1;
+  background: white;
+  color: #a8a29e;
+  transition: all 0.3s ease;
+}
+
+.step-circle--active {
+  border-color: var(--color-barber-accent);
+  background: var(--color-barber-accent);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15);
+}
+
+.step-circle--done {
+  border-color: var(--color-barber-accent);
+  background: var(--color-barber-accent);
+  color: white;
+}
+
+.step-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #a8a29e;
+  transition: color 0.3s;
+  white-space: nowrap;
+}
+
+.step-label--active {
+  color: var(--color-barber-accent);
+  font-weight: 600;
+}
+
+.step-label--done {
+  color: #78716c;
+}
+
+.step-connector {
+  width: 40px;
+  height: 2px;
+  background: #e7e5e4;
+  margin: 0 4px;
+  margin-bottom: 26px;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+.step-connector--done {
+  background: var(--color-barber-accent);
+}
+
+/* ─── BOOKING PANEL TRANSITIONS ───────────────────────────── */
+.booking-panel {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.booking-panel.hidden {
+  display: none;
+}
+
+.booking-panel.slide-in {
+  animation: slideIn 0.3s ease forwards;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ─── SCROLL ANIMATIONS ───────────────────────────────────── */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.scroll-animate.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-animate-delay-1 { transition-delay: 0.1s; }
+.scroll-animate-delay-2 { transition-delay: 0.2s; }
+.scroll-animate-delay-3 { transition-delay: 0.3s; }
+
+/* ─── SERVICE CARDS ───────────────────────────────────────── */
+.service-card {
+  transition: all 0.25s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+}
+
+.service-card:hover .service-icon {
+  transform: scale(1.1);
+}
+
+.service-icon {
+  transition: transform 0.25s ease;
+}
+
+/* ─── BARBER CARDS ────────────────────────────────────────── */
+.barber-card {
+  transition: all 0.25s ease;
+}
+
+.barber-card:hover {
+  transform: translateY(-3px);
+}
+
+.barber-card:hover .barber-avatar {
+  border-color: var(--color-barber-accent);
+  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.2);
+}
+
+.barber-avatar {
+  transition: all 0.3s ease;
+}
+
+/* ─── MOBILE ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .step-connector {
+    width: 20px;
+    margin: 0 2px;
+    margin-bottom: 26px;
+  }
+  
+  .step-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  
+  .step-label {
+    font-size: 10px;
+  }
+}

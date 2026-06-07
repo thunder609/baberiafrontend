@@ -1,0 +1,18 @@
+{
+  "name": "barberia-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n landing,admin -c cyan,magenta \"npm run dev:landing\" \"npm run dev:admin\"",
+    "dev:landing": "cd landing && npm run dev",
+    "dev:admin": "cd admin && npm start",
+    "build": "npm run build:landing && npm run build:admin && npm run assemble",
+    "build:landing": "cd landing && npm run build",
+    "build:admin": "cd admin && npx ng build --base-href /admin/",
+    "assemble": "rm -rf dist && cp -r landing/dist dist && mkdir -p dist/admin && cp -r admin/dist/frontbarberia/browser/* dist/admin/"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
