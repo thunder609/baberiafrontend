@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "postinstall": "cd landing && npm install && cd ../admin && npm install",
     "dev": "concurrently -n landing,admin -c cyan,magenta \"npm run dev:landing\" \"npm run dev:admin\"",
     "dev:landing": "cd landing && npm run dev",
     "dev:admin": "cd admin && npm start",
