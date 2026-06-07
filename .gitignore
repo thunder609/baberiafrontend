@@ -6,6 +6,9 @@ dist/
 .env.local
 .env.*.local
 
+# Prevent nested .git from being treated as submodule
+admin/.git/
+
 # OS
 .DS_Store
 Thumbs.db
