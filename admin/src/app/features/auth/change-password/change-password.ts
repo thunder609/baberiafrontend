@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-change-password',
@@ -118,7 +119,7 @@ export class ChangePassword {
         return;
       }
 
-      const res = await fetch('http://localhost:8080/api/auth/change-password', {
+      const res = await fetch(`${environment.apiUrl}/api/auth/change-password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

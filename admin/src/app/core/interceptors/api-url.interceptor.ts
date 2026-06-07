@@ -1,6 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = environment.apiUrl;
 
 export const apiUrlInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.url.startsWith('/api')) {
