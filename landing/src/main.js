@@ -1,5 +1,47 @@
 import './style.css';
 
+// ─── MOBILE NAV (runs immediately — module scripts are deferred) ──
+document.addEventListener('DOMContentLoaded', () => {
+  const navToggle = document.getElementById('nav-toggle');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if (!navToggle || !mobileMenu) return;
+
+  const mobileIcon = navToggle.querySelector('i');
+
+  function openNav() {
+    mobileMenu.style.display = '';
+    if (mobileIcon) mobileIcon.className = 'fa-solid fa-xmark text-lg pointer-events-none';
+    navToggle.setAttribute('aria-label', 'Cerrar menú');
+  }
+
+  function closeNav() {
+    mobileMenu.style.display = 'none';
+    if (mobileIcon) mobileIcon.className = 'fa-solid fa-bars text-lg pointer-events-none';
+    navToggle.setAttribute('aria-label', 'Abrir menú');
+  }
+
+  navToggle.addEventListener('click', () => {
+    if (mobileMenu.style.display === 'none') openNav();
+    else closeNav();
+  });
+
+  document.querySelectorAll('.nav-mobile-link').forEach((link) => {
+    link.addEventListener('click', closeNav);
+  });
+});
+
+// ─── HERO LAZY LOAD ──────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  const bg = document.getElementById('hero-bg');
+  if (!bg) return;
+  const img = new Image();
+  img.onload = () => {
+    bg.style.backgroundImage = "url('https://images.unsplash.com/photo-1585747861115-7fb8e36ab164?q=80&w=2070&auto=format&fit=crop')";
+    bg.classList.add('loaded');
+  };
+  img.src = 'https://images.unsplash.com/photo-1585747861115-7fb8e36ab164?q=80&w=2070&auto=format&fit=crop';
+});
+
 // ─── STATE ──────────────────────────────────────────────────
 const state = {
   barbers: [],
@@ -111,9 +153,9 @@ function showStep(n) {
   prev.classList.toggle('hidden', n === 1);
 
   if (n === 5) {
-    next.innerHTML = '<i class="fa-regular fa-circle-check mr-1"></i> Reservar turno';
+    next.innerHTML = 'Reservar turno';
   } else {
-    next.innerHTML = `Siguiente <i class="fa-solid fa-arrow-right ml-1"></i>`;
+    next.innerHTML = 'Siguiente';
   }
 
   // Clear feedback on step change
@@ -245,8 +287,9 @@ async function loadServices() {
       .map((s, i) => {
         const icon = serviceIcon(s.name);
         const color = SERVICE_COLORS[i % SERVICE_COLORS.length];
+        const delay = Math.min(100 + i * 100, 600);
         return `
-      <div class="service-card rounded-xl border border-stone-200 bg-white p-6 text-center shadow-sm cursor-default">
+      <div class="service-card reveal reveal-up delay-${delay} rounded-xl border border-stone-200 bg-white p-6 text-center shadow-sm cursor-default">
         <div class="service-icon mx-auto flex h-14 w-14 items-center justify-center rounded-full ${color}">
           <i class="fa-solid ${icon} text-xl"></i>
         </div>
@@ -275,8 +318,10 @@ async function loadBarbers() {
     }
     grid.innerHTML = state.barbers
       .map(
-        (b) => `
-      <div class="barber-card text-center">
+        (b, i) => {
+          const delay = Math.min(100 + i * 100, 600);
+          return `
+      <div class="barber-card reveal reveal-up delay-${delay} text-center">
         <div class="barber-avatar mx-auto h-32 w-32 overflow-hidden rounded-full border-4 border-stone-700">
           <div class="flex h-full items-center justify-center bg-gradient-to-br from-stone-800 to-stone-900 text-4xl font-bold text-barber-accent">
             ${b.name.charAt(0)}
@@ -284,11 +329,12 @@ async function loadBarbers() {
         </div>
         <h3 class="mt-4 font-serif text-lg font-semibold text-white">${b.name}</h3>
         <p class="text-sm text-stone-400">Barbero profesional</p>
-        <a href="#turnos" class="mt-4 inline-block rounded-md border border-barber-accent/40 px-5 py-2 text-xs font-medium text-barber-accent transition hover:bg-barber-accent hover:text-white">
+        <a href="#turnos" class="barber-cta mt-4 inline-block rounded-md border border-barber-accent/40 px-5 py-2 text-xs font-medium text-barber-accent transition hover:bg-barber-accent hover:text-white">
           <i class="fa-regular fa-calendar-check mr-1"></i>Reservá con ${b.name.split(' ')[0]}
         </a>
       </div>
-    `
+    `;
+        }
       )
       .join('');
   } catch (e) {
@@ -423,7 +469,9 @@ async function buildTimeSlots() {
   }
 
   state.selectedTime = '';
-  container.innerHTML = '<p class="col-span-full text-center text-xs text-barber-muted">Calculando horarios disponibles…</p>';
+  container.innerHTML = Array.from({ length: 8 }, () =>
+    '<div class="skeleton-light rounded-lg" style="height: 44px;"></div>'
+  ).join('');
 
   try {
     // 1. Get schedules for that day of week
@@ -755,18 +803,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     observer.observe(el, { attributes: true, attributeFilter: ['class'] });
   });
 
-  // ─── SCROLL ANIMATIONS ──────────────────────────────────
-  const scrollObserver = new IntersectionObserver((entries) => {
+  // ─── SCROLL REVEAL ────────────────────────────────────
+  const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        scrollObserver.unobserve(entry.target);
+        entry.target.classList.add('reveal-visible');
+        revealObserver.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
-  document.querySelectorAll('.scroll-animate').forEach((el) => {
-    scrollObserver.observe(el);
+  document.querySelectorAll('.reveal').forEach((el) => {
+    revealObserver.observe(el);
   });
 
   // Initial display

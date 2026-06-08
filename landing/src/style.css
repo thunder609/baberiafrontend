@@ -5,17 +5,14 @@
   --font-sans: "Inter", sans-serif;
   --color-barber-dark: #1c1917;
   --color-barber-accent: #d97706;
-  --color-barber-gold: #b8860b;
   --color-barber-cream: #faf6f1;
   --color-barber-muted: #78716c;
 }
 
-/* Smooth scroll */
 html {
   scroll-behavior: smooth;
 }
 
-/* Hero pattern overlay */
 .hero-overlay {
   background: linear-gradient(
     135deg,
@@ -25,99 +22,107 @@ html {
   );
 }
 
-/* Stripe pattern for barber pole effect */
-.barber-stripes {
-  background: repeating-linear-gradient(
-    45deg,
-    transparent,
-    transparent 20px,
-    rgba(217, 119, 6, 0.05) 20px,
-    rgba(217, 119, 6, 0.05) 40px
-  );
-}
-
-/* Classic divider */
 .divider {
-  height: 2px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--color-barber-accent),
-    transparent
-  );
-  width: 120px;
+  height: 1px;
+  background: #d6d3d1;
+  width: 48px;
   margin: 0 auto;
 }
 
-/* Fade-in animation */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.divider--light {
+  background: #57534e;
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out forwards;
+@keyframes heroFade {
+  0%   { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-.animate-fade-in-up-delay {
-  animation: fadeInUp 0.6s ease-out 0.2s forwards;
+.hero-enter-1 { animation: heroFade 0.6s ease-out forwards; }
+.hero-enter-2 { animation: heroFade 0.6s ease-out 0.15s forwards; opacity: 0; }
+.hero-enter-3 { animation: heroFade 0.6s ease-out 0.3s forwards; opacity: 0; }
+.hero-enter-4 { animation: heroFade 0.6s ease-out 0.45s forwards; opacity: 0; }
+
+.reveal {
   opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.animate-fade-in-up-delay-2 {
-  animation: fadeInUp 0.6s ease-out 0.4s forwards;
-  opacity: 0;
-}
-
-/* Booking step transitions */
-.booking-step {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.booking-step-enter {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-.booking-step-active {
+.reveal-visible {
   opacity: 1;
-  transform: translateX(0);
+  transform: translateY(0);
 }
 
-/* Time slot grid */
+.delay-0   { transition-delay: 0s; }
+.delay-100 { transition-delay: 0.1s; }
+.delay-150 { transition-delay: 0.15s; }
+.delay-200 { transition-delay: 0.2s; }
+.delay-300 { transition-delay: 0.3s; }
+.delay-400 { transition-delay: 0.4s; }
+.delay-500 { transition-delay: 0.5s; }
+.delay-600 { transition-delay: 0.6s; }
+
+.service-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.service-icon {
+  transition: transform 0.2s ease;
+}
+
+.barber-card {
+  transition: transform 0.2s ease;
+}
+
+.barber-card:hover {
+  transform: translateY(-2px);
+}
+
+.barber-card:hover .barber-avatar {
+  border-color: var(--color-barber-accent);
+}
+
+.barber-avatar {
+  transition: border-color 0.2s ease;
+}
+
+.contact-card {
+  transition: transform 0.2s ease;
+}
+
+.contact-card:hover {
+  transform: translateY(-2px);
+}
+
+.booking-step {
+  transition: opacity 0.3s ease;
+}
+
 .time-slot {
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
 }
 
 .time-slot:hover:not(.time-slot--taken) {
-  transform: translateY(-1px);
+  border-color: var(--color-barber-accent);
 }
 
 .time-slot--selected {
-  ring: 2px solid var(--color-barber-accent);
+  border-color: var(--color-barber-accent);
   background-color: #fef3c7;
 }
 
 .time-slot--taken {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
   text-decoration: line-through;
 }
 
-/* Glassmorphism card */
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ─── STEP INDICATOR ──────────────────────────────────────── */
 #steps-indicator {
   display: flex;
   align-items: center;
@@ -135,25 +140,24 @@ html {
 }
 
 .step-circle {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  border: 2px solid #d6d3d1;
-  background: white;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1.5px solid #d6d3d1;
+  background: transparent;
   color: #a8a29e;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .step-circle--active {
   border-color: var(--color-barber-accent);
   background: var(--color-barber-accent);
   color: white;
-  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.15);
 }
 
 .step-circle--done {
@@ -166,13 +170,11 @@ html {
   font-size: 11px;
   font-weight: 500;
   color: #a8a29e;
-  transition: color 0.3s;
-  white-space: nowrap;
+  transition: color 0.25s;
 }
 
 .step-label--active {
   color: var(--color-barber-accent);
-  font-weight: 600;
 }
 
 .step-label--done {
@@ -180,12 +182,12 @@ html {
 }
 
 .step-connector {
-  width: 40px;
-  height: 2px;
+  width: 32px;
+  height: 1.5px;
   background: #e7e5e4;
-  margin: 0 4px;
-  margin-bottom: 26px;
-  transition: background 0.3s;
+  margin: 0 2px;
+  margin-bottom: 25px;
+  transition: background 0.25s;
   flex-shrink: 0;
 }
 
@@ -193,97 +195,64 @@ html {
   background: var(--color-barber-accent);
 }
 
-/* ─── BOOKING PANEL TRANSITIONS ───────────────────────────── */
 .booking-panel {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.2s ease;
 }
 
 .booking-panel.hidden {
   display: none;
 }
 
+@keyframes panelFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 .booking-panel.slide-in {
-  animation: slideIn 0.3s ease forwards;
+  animation: panelFade 0.25s ease forwards;
 }
 
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+/* ─── SKELETONS ──────────────────────────────────────────── */
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-/* ─── SCROLL ANIMATIONS ───────────────────────────────────── */
-.scroll-animate {
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 0.5rem;
+}
+
+.skeleton-light {
+  background: linear-gradient(
+    90deg,
+    #e7e5e4 0%,
+    #f5f5f4 50%,
+    #e7e5e4 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.hero-img {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition: opacity 0.6s ease;
 }
 
-.scroll-animate.visible {
-  opacity: 1;
-  transform: translateY(0);
+.hero-img.loaded {
+  opacity: 0.25;
 }
 
-.scroll-animate-delay-1 { transition-delay: 0.1s; }
-.scroll-animate-delay-2 { transition-delay: 0.2s; }
-.scroll-animate-delay-3 { transition-delay: 0.3s; }
-
-/* ─── SERVICE CARDS ───────────────────────────────────────── */
-.service-card {
-  transition: all 0.25s ease;
-}
-
-.service-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
-}
-
-.service-card:hover .service-icon {
-  transform: scale(1.1);
-}
-
-.service-icon {
-  transition: transform 0.25s ease;
-}
-
-/* ─── BARBER CARDS ────────────────────────────────────────── */
-.barber-card {
-  transition: all 0.25s ease;
-}
-
-.barber-card:hover {
-  transform: translateY(-3px);
-}
-
-.barber-card:hover .barber-avatar {
-  border-color: var(--color-barber-accent);
-  box-shadow: 0 0 0 4px rgba(217, 119, 6, 0.2);
-}
-
-.barber-avatar {
-  transition: all 0.3s ease;
-}
-
-/* ─── MOBILE ──────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .step-connector {
-    width: 20px;
-    margin: 0 2px;
-    margin-bottom: 26px;
-  }
-  
-  .step-circle {
-    width: 32px;
-    height: 32px;
-    font-size: 12px;
-  }
-  
-  .step-label {
-    font-size: 10px;
-  }
+  .step-connector { width: 16px; margin-bottom: 25px; }
+  .step-circle { width: 28px; height: 28px; font-size: 11px; }
+  .step-label { font-size: 10px; }
 }
