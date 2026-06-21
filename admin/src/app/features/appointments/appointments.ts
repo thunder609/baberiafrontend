@@ -10,7 +10,7 @@ import type { AppointmentRequest } from '../../core/models';
   selector: 'app-appointments',
   imports: [FormsModule],
   template: `
-    <div class="mx-auto max-w-4xl">
+    <div class="mx-auto max-w-5xl">
       <div class="mb-6 flex items-center justify-between">
         <h2 class="text-xl font-bold tracking-tight text-barber-dark">Turnos</h2>
         <div class="flex gap-2">
@@ -107,33 +107,13 @@ import type { AppointmentRequest } from '../../core/models';
                     <button (click)="transition(apt.id, 'confirm')" class="mr-1 text-xs font-medium text-blue-600 hover:text-blue-800">Confirmar</button>
                     <button (click)="transition(apt.id, 'cancel')" class="mr-1 text-xs font-medium text-red-500 hover:text-red-700">Cancelar</button>
                     <button (click)="transition(apt.id, 'no-show')" class="mr-1 text-xs font-medium text-stone-400 hover:text-stone-600">No-show</button>
-                    <button (click)="startReassign(apt.id)" class="text-xs font-medium text-amber-600 hover:text-amber-800">Reasignar</button>
-                    @if (reassigningId() === apt.id) {
-                      <span class="ml-1">
-                        <select #clientSelect (change)="doReassign(apt.id, +clientSelect.value)" class="rounded border border-stone-300 px-1 py-0.5 text-xs">
-                          <option value="">Cliente…</option>
-                          @for (c of clientService.items(); track c.id) {
-                            <option [value]="c.id">{{ c.name }}</option>
-                          }
-                        </select>
-                      </span>
-                    }
+                    <button (click)="openReassign(apt)" class="text-xs font-medium text-amber-600 hover:text-amber-800">Reasignar</button>
                   }
                   @if (apt.status === 'CONFIRMED') {
                     <button (click)="transition(apt.id, 'start')" class="mr-1 text-xs font-medium text-violet-600 hover:text-violet-800">Empezar</button>
                     <button (click)="transition(apt.id, 'cancel')" class="mr-1 text-xs font-medium text-red-500 hover:text-red-700">Cancelar</button>
                     <button (click)="transition(apt.id, 'no-show')" class="mr-1 text-xs font-medium text-stone-400 hover:text-stone-600">No-show</button>
-                    <button (click)="startReassign(apt.id)" class="text-xs font-medium text-amber-600 hover:text-amber-800">Reasignar</button>
-                    @if (reassigningId() === apt.id) {
-                      <span class="ml-1">
-                        <select #clientSelect (change)="doReassign(apt.id, +clientSelect.value)" class="rounded border border-stone-300 px-1 py-0.5 text-xs">
-                          <option value="">Cliente…</option>
-                          @for (c of clientService.items(); track c.id) {
-                            <option [value]="c.id">{{ c.name }}</option>
-                          }
-                        </select>
-                      </span>
-                    }
+                    <button (click)="openReassign(apt)" class="text-xs font-medium text-amber-600 hover:text-amber-800">Reasignar</button>
                   }
                   @if (apt.status === 'IN_PROGRESS') {
                     <button (click)="transition(apt.id, 'complete')" class="mr-1 text-xs font-medium text-emerald-600 hover:text-emerald-800">Completar</button>
@@ -223,13 +203,67 @@ import type { AppointmentRequest } from '../../core/models';
         </div>
       </div>
     }
+
+    @if (showReassign()) {
+      <div
+        class="fixed inset-0 z-10 flex items-center justify-center bg-black/40"
+        (click)="closeReassign()"
+      >
+        <div class="w-full max-w-sm rounded-xl border border-stone-200 bg-white p-6 shadow-2xl" (click)="$event.stopPropagation()">
+          <h3 class="mb-5 text-base font-bold text-barber-dark">Reasignar turno</h3>
+
+          <div class="mb-3">
+            <label class="mb-1 block text-xs font-medium text-barber-muted">Cliente</label>
+            <select [(ngModel)]="reassignClientId" class="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent">
+              <option [ngValue]="null">Seleccionar</option>
+              @for (c of clientService.items(); track c.id) {
+                <option [ngValue]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="mb-1 block text-xs font-medium text-barber-muted">Servicio</label>
+            <select [(ngModel)]="reassignServiceId" class="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent">
+              @for (s of serviceService.items(); track s.id) {
+                <option [ngValue]="s.id">{{ s.name }} (\${{ s.price }})</option>
+              }
+            </select>
+          </div>
+          <div class="mb-3 flex gap-3">
+            <div class="flex-1">
+              <label class="mb-1 block text-xs font-medium text-barber-muted">Fecha</label>
+              <input [(ngModel)]="reassignDate" type="date" class="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent" />
+            </div>
+            <div class="flex-1">
+              <label class="mb-1 block text-xs font-medium text-barber-muted">Hora</label>
+              <input [(ngModel)]="reassignTime" type="time" class="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent" />
+            </div>
+          </div>
+
+          @if (errors().length) {
+            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700">
+              @for (err of errors(); track err) {
+                <p>{{ err }}</p>
+              }
+            </div>
+          }
+
+          <div class="flex justify-end gap-2">
+            <button (click)="closeReassign()" class="rounded-lg border border-stone-200 px-4 py-2 text-sm font-medium text-barber-muted transition hover:bg-stone-50">Cancelar</button>
+            <button (click)="saveReassign()" [disabled]="reassignSaving()" class="rounded-lg bg-barber-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-600 disabled:opacity-50">
+              {{ reassignSaving() ? 'Guardando…' : 'Reasignar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   `,
 })
 export class Appointments implements OnInit {
   protected readonly showForm = signal(false);
+  protected readonly showReassign = signal(false);
   protected readonly errors = signal<string[]>([]);
-  protected readonly reassigningId = signal<number | null>(null);
-  protected readonly selectedNewClientId = signal<number | null>(null);
+  protected readonly reassignSaving = signal(false);
   protected selectedBarberId: number | null = null;
   protected todayLocal = (() => {
     const d = new Date();
@@ -247,6 +281,13 @@ export class Appointments implements OnInit {
     startTime: '',
     notes: '',
   };
+
+  // --- Reassign state ---
+  protected reassignAptId: number | null = null;
+  protected reassignClientId: number | null = null;
+  protected reassignDate = '';
+  protected reassignTime = '';
+  protected reassignServiceId: number | null = null;
 
   constructor(
     protected appointmentService: AppointmentService,
@@ -381,19 +422,55 @@ export class Appointments implements OnInit {
     });
   }
 
-  protected startReassign(id: number) {
-    this.reassigningId.set(this.reassigningId() === id ? null : id);
+  protected openReassign(apt: { id: number; clientId: number; serviceId: number; startTime: string }) {
+    this.reassignAptId = apt.id;
+    this.reassignClientId = apt.clientId;
+    this.reassignServiceId = apt.serviceId;
+    this.reassignDate = apt.startTime.slice(0, 10);
+    this.reassignTime = apt.startTime.slice(11, 16);
+    this.errors.set([]);
+    this.showReassign.set(true);
   }
 
-  protected doReassign(id: number, newClientId: number) {
-    if (!newClientId) return;
-    this.appointmentService.reassign(id, newClientId).subscribe({
+  protected closeReassign() {
+    this.errors.set([]);
+    this.showReassign.set(false);
+    this.reassignAptId = null;
+  }
+
+  protected saveReassign() {
+    if (!this.reassignAptId) return;
+    if (!this.reassignClientId) {
+      this.errors.set(['Seleccioná un cliente.']);
+      return;
+    }
+    if (!this.reassignDate || !this.reassignTime) {
+      this.errors.set(['Seleccioná fecha y hora.']);
+      return;
+    }
+
+    this.reassignSaving.set(true);
+    const startTime = `${this.reassignDate}T${this.reassignTime}:00`;
+    this.appointmentService.reassign(
+      this.reassignAptId,
+      this.reassignClientId,
+      startTime,
+      this.reassignServiceId ?? undefined,
+    ).subscribe({
       next: () => {
-        this.reassigningId.set(null);
+        this.reassignSaving.set(false);
+        this.closeReassign();
         this.loadAppointments();
       },
-      error: () => {
-        this.reassigningId.set(null);
+      error: (err) => {
+        this.reassignSaving.set(false);
+        if (err.error?.message) {
+          this.errors.set([err.error.message]);
+        } else if (err.status === 409) {
+          this.errors.set(['El horario elegido coincide con otro turno.']);
+        } else {
+          this.errors.set(['Error al reasignar el turno.']);
+        }
       },
     });
   }

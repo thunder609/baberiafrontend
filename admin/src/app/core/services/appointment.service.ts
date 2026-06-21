@@ -51,7 +51,10 @@ export class AppointmentService {
     return this.http.put<Appointment>(`/api/appointments/${id}/no-show`, {});
   }
 
-  reassign(id: number, clientId: number) {
-    return this.http.put<Appointment>(`/api/appointments/${id}/reassign`, { clientId });
+  reassign(id: number, clientId: number, startTime?: string, serviceId?: number) {
+    const body: Record<string, any> = { clientId };
+    if (startTime) body.startTime = startTime;
+    if (serviceId) body.serviceId = serviceId;
+    return this.http.put<Appointment>(`/api/appointments/${id}/reassign`, body);
   }
 }
