@@ -177,33 +177,28 @@
           <div id="steps-indicator" class="mb-8">
             <div class="step-item" data-step="1">
               <div class="step-circle step-circle--active">1</div>
-              <span class="step-label step-label--active">Barbero</span>
+              <span class="step-label step-label--active" data-i18n="booking.step1">Barbero</span>
             </div>
             <div class="step-connector" data-connector="1"></div>
             <div class="step-item" data-step="2">
               <div class="step-circle">2</div>
-              <span class="step-label">Servicio</span>
+              <span class="step-label" data-i18n="booking.step2">Servicio</span>
             </div>
             <div class="step-connector" data-connector="2"></div>
             <div class="step-item" data-step="3">
               <div class="step-circle">3</div>
-              <span class="step-label">Fecha</span>
+              <span class="step-label" data-i18n="booking.step3">Fecha y hora</span>
             </div>
             <div class="step-connector" data-connector="3"></div>
             <div class="step-item" data-step="4">
               <div class="step-circle">4</div>
-              <span class="step-label">Hora</span>
-            </div>
-            <div class="step-connector" data-connector="4"></div>
-            <div class="step-item" data-step="5">
-              <div class="step-circle">5</div>
-              <span class="step-label">Tus datos</span>
+              <span class="step-label" data-i18n="booking.step4">Tus datos</span>
             </div>
           </div>
 
           <!-- Step 1: Barber -->
           <div class="booking-panel" data-step="1">
-            <h3 class="mb-4 text-lg font-semibold text-barber-dark">Elegí tu barbero</h3>
+            <h3 class="mb-4 text-lg font-semibold text-barber-dark" data-i18n="booking.header1">Elegí tu barbero</h3>
             <div id="booking-barbers" class="grid grid-cols-2 gap-3">
               <!-- JS populate -->
             </div>
@@ -211,75 +206,76 @@
 
           <!-- Step 2: Service -->
           <div class="booking-panel hidden" data-step="2">
-            <h3 class="mb-4 text-lg font-semibold text-barber-dark">Elegí el servicio</h3>
+            <h3 class="mb-4 text-lg font-semibold text-barber-dark" data-i18n="booking.header2">Elegí el servicio</h3>
             <div id="booking-services" class="grid gap-3">
               <!-- JS populate -->
             </div>
           </div>
 
-          <!-- Step 3: Date -->
+          <!-- Step 3: Date + Time -->
           <div class="booking-panel hidden" data-step="3">
-            <h3 class="mb-4 text-lg font-semibold text-barber-dark">Elegí la fecha</h3>
+            <h3 class="mb-4 text-lg font-semibold text-barber-dark" data-i18n="booking.header3">Elegí fecha y hora</h3>
+
             <input
               id="booking-date"
               type="date"
               class="w-full rounded-lg border border-stone-200 px-4 py-3 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-2 focus:ring-barber-accent/20"
             />
-            <p id="date-feedback" class="mt-2 text-xs text-barber-muted"></p>
+
+            <div id="date-time-container" class="mt-5">
+              <div id="time-slots" class="grid grid-cols-3 gap-2 sm:grid-cols-4">
+                <!-- JS populate -->
+              </div>
+              <p id="time-feedback" class="mt-3 text-xs text-barber-muted"></p>
+            </div>
           </div>
 
-          <!-- Step 4: Time -->
+          <!-- Step 4: Personal info -->
           <div class="booking-panel hidden" data-step="4">
-            <h3 class="mb-4 text-lg font-semibold text-barber-dark">Elegí el horario</h3>
-            <div id="time-slots" class="grid grid-cols-3 gap-2 sm:grid-cols-4">
-              <!-- JS populate -->
-            </div>
-            <p id="time-feedback" class="mt-3 text-xs text-barber-muted"></p>
-          </div>
-
-          <!-- Step 5: Personal info -->
-          <div class="booking-panel hidden" data-step="5">
-            <h3 class="mb-4 text-lg font-semibold text-barber-dark">Confirmá tu turno</h3>
-
-            <!-- Booking summary -->
-            <div id="booking-summary" class="mb-5 rounded-lg border border-stone-200 bg-stone-50 p-4 text-sm space-y-2">
-              <!-- JS populate -->
-            </div>
+            <h3 class="mb-4 text-lg font-semibold text-barber-dark" data-i18n="booking.header4">Confirmá tu turno</h3>
 
             <div class="space-y-3">
               <div>
-                <label class="mb-1 block text-xs font-medium text-barber-muted">Email</label>
-                <input
-                  id="field-email"
-                  type="email"
-                  placeholder="tucorreo@email.com"
-                  class="w-full rounded-lg border border-stone-200 px-4 py-3 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-2 focus:ring-barber-accent/20"
-                />
-              </div>
-              <div>
-                <label class="mb-1 block text-xs font-medium text-barber-muted">Teléfono</label>
+                <label class="mb-1 block text-xs font-medium text-barber-muted" data-i18n="booking.lookupPhone">Teléfono</label>
                 <input
                   id="field-phone"
                   type="tel"
+                  data-i18n-placeholder="booking.phonePlaceholder"
                   placeholder="+54 11 1234-5678"
                   class="w-full rounded-lg border border-stone-200 px-4 py-3 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-2 focus:ring-barber-accent/20"
                 />
               </div>
               <div>
-                <label class="mb-1 block text-xs font-medium text-barber-muted">Nombre</label>
+                <label class="mb-1 block text-xs font-medium text-barber-muted" data-i18n="booking.lookupEmail">Email</label>
+                <input
+                  id="field-email"
+                  type="email"
+                  data-i18n-placeholder="booking.emailPlaceholder"
+                  placeholder="tucorreo@email.com"
+                  class="w-full rounded-lg border border-stone-200 px-4 py-3 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-2 focus:ring-barber-accent/20"
+                />
+              </div>
+              <div>
+                <label class="mb-1 block text-xs font-medium text-barber-muted" data-i18n="booking.lookupName">Nombre</label>
                 <input
                   id="field-name"
                   type="text"
+                  data-i18n-placeholder="booking.namePlaceholder"
                   placeholder="Tu nombre"
                   class="w-full rounded-lg border border-stone-200 px-4 py-3 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-2 focus:ring-barber-accent/20"
                 />
               </div>
             </div>
+
+            <!-- Booking summary -->
+            <div id="booking-summary" class="mt-5 rounded-lg border border-stone-200 bg-stone-50 p-4 text-sm space-y-2">
+              <!-- JS populate -->
+            </div>
           </div>
 
           <!-- Navigation -->
           <div class="mt-6 flex items-center justify-between border-t border-stone-100 pt-5">
-            <button id="btn-prev" class="hidden px-3 py-2 text-sm text-barber-muted transition hover:text-barber-dark">
+            <button id="btn-prev" data-i18n="booking.prev" class="hidden px-3 py-2 text-sm text-barber-muted transition hover:text-barber-dark">
               Anterior
             </button>
             <div class="flex-1"></div>

@@ -42,33 +42,32 @@ function changeLanguage(lang) {
 
 // ─── CLIENT LOOKUP ──────────────────────────────────────────
 async function lookupClient() {
-  const email = $('#field-email').value.trim();
   const phone = $('#field-phone').value.trim();
-  if (!email && !phone) return;
+  const email = $('#field-email').value.trim();
+  if (!phone && !email) return;
 
   try {
     const clients = await api('/api/clients');
-    const match = email
-      ? clients.find((c) => c.email === email)
-      : clients.find((c) => c.phone === phone);
-
-    const nameField = $('#field-name');
-    const phoneField = $('#field-phone');
+    const match = phone
+      ? clients.find((c) => c.phone === phone)
+      : clients.find((c) => c.email === email);
 
     if (match) {
-      nameField.value = match.name;
+      $('#field-name').value = match.name;
       state.clientName = match.name;
-      if (email && match.phone) {
-        phoneField.value = match.phone;
-        state.clientPhone = match.phone;
+      if (phone) {
+        $('#field-email').value = match.email || '';
+        state.clientEmail = match.email || '';
       }
-      state.clientEmail = match.email;
+      if (email && !phone) {
+        $('#field-phone').value = match.phone || '';
+        state.clientPhone = match.phone || '';
+      }
       const feedback = $('#booking-feedback');
       feedback.className = 'mt-4 rounded-lg border p-3 text-sm border-emerald-200 bg-emerald-50 text-emerald-700';
       feedback.textContent = t('booking.welcomeBack', { name: match.name });
       feedback.classList.remove('hidden');
     } else {
-      nameField.value = '';
       hideFeedback();
     }
   } catch (e) {
@@ -97,20 +96,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#field-phone').addEventListener('blur', lookupClient);
 
   $('#btn-next').addEventListener('click', () => {
-    if (state.step === 5) {
+    if (state.step === 4) {
       state.clientName = $('#field-name').value;
       state.clientPhone = $('#field-phone').value;
       state.clientEmail = $('#field-email').value;
       submitBooking();
-    } else if (state.step === 4) {
-      goNext();
     } else {
       goNext();
     }
   });
 
   $('#btn-prev').addEventListener('click', () => {
-    if (state.step === 5) {
+    if (state.step === 4) {
       state.clientName = $('#field-name').value;
       state.clientPhone = $('#field-phone').value;
       state.clientEmail = $('#field-email').value;

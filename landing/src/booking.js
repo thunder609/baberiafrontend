@@ -37,7 +37,7 @@ export function showStep(n) {
   const next = $('#btn-next');
   prev.classList.toggle('hidden', n === 1);
 
-  if (n === 5) {
+  if (n === 4) {
     next.innerHTML = t('booking.submit');
   } else {
     next.innerHTML = t('booking.next');
@@ -105,24 +105,22 @@ function validateStep(step) {
         showFeedback(t('validate.selectDate'));
         return false;
       }
-      return true;
-    case 4:
       if (!state.selectedTime) {
         showFeedback(t('validate.selectTime'));
         return false;
       }
       return true;
-    case 5:
-      if (!state.clientEmail.trim()) {
-        showFeedback(t('validate.emailRequired'));
+    case 4:
+      if (!state.clientName.trim()) {
+        showFeedback(t('validate.nameRequired'));
         return false;
       }
       if (!state.clientPhone.trim()) {
         showFeedback(t('validate.phoneRequired'));
         return false;
       }
-      if (!state.clientName.trim()) {
-        showFeedback(t('validate.nameRequired'));
+      if (!state.clientEmail.trim()) {
+        showFeedback(t('validate.emailRequired'));
         return false;
       }
       return true;
@@ -235,11 +233,19 @@ export function buildDatePicker() {
     state.selectedDate = input.value;
     state.selectedTime = '';
     hideFeedback();
+    buildTimeSlots();
   });
+
+  const container = $('#date-time-container');
+  container.innerHTML = `
+    <div id="time-slots" class="grid grid-cols-3 gap-2 sm:grid-cols-4">
+      <p class="col-span-full text-center text-xs text-barber-muted">${t('booking.selectDateFirst')}</p>
+    </div>
+    <p id="time-feedback" class="mt-3 text-xs text-barber-muted"></p>
+  `;
 }
 
-// ─── BOOKING: BUILD STEP 4 ──────────────────────────────────
-export async function buildTimeSlots() {
+async function buildTimeSlots() {
   const container = $('#time-slots');
   const feedback = $('#time-feedback');
 
@@ -370,7 +376,7 @@ export async function buildTimeSlots() {
 
 // ─── SUBMIT ─────────────────────────────────────────────────
 export async function submitBooking() {
-  if (!validateStep(5)) return;
+  if (!validateStep(4)) return;
 
   const btn = $('#btn-next');
   const btnText = btn.innerHTML;
@@ -442,6 +448,7 @@ export async function submitBooking() {
         b.classList.add('border-stone-200');
       });
       buildServiceSelection();
+      buildDatePicker();
       btn.disabled = false;
       btn.className = 'rounded-md bg-barber-accent px-6 py-2 text-sm font-semibold text-white transition hover:bg-amber-600';
       btn.innerHTML = btnText;
@@ -460,11 +467,6 @@ export function initStepObserver() {
   const observer = new MutationObserver(() => {
     const panel4 = document.querySelector('.booking-panel[data-step="4"]');
     if (panel4 && !panel4.classList.contains('hidden')) {
-      buildTimeSlots();
-    }
-
-    const panel5 = document.querySelector('.booking-panel[data-step="5"]');
-    if (panel5 && !panel5.classList.contains('hidden')) {
       $('#field-name').value = state.clientName;
       $('#field-phone').value = state.clientPhone;
       $('#field-email').value = state.clientEmail;
