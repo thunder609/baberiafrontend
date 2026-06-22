@@ -16,9 +16,9 @@ html {
 .hero-overlay {
   background: linear-gradient(
     135deg,
-    rgba(28, 25, 23, 0.92) 0%,
-    rgba(28, 25, 23, 0.7) 50%,
-    rgba(28, 25, 23, 0.92) 100%
+    rgba(28, 25, 23, 0.6) 0%,
+    rgba(28, 25, 23, 0.3) 50%,
+    rgba(28, 25, 23, 0.6) 100%
   );
 }
 
@@ -248,7 +248,7 @@ html {
 }
 
 .hero-img.loaded {
-  opacity: 0.25;
+  opacity: 0.6;
 }
 
 @media (max-width: 640px) {

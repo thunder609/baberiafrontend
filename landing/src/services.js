@@ -2,20 +2,20 @@ import { $, api } from './utils.js';
 import { t } from './translations.js';
 import { state } from './state.js';
 
-const BASE_IMG = 'https://barbe.vercel.app/imagenespro';
+const BRO_BASE = 'https://themes.getmotopress.com/bro-barbershop/wp-content/uploads/sites/64/2024/01';
 const SERVICE_IMAGES = {
-  'corte': `${BASE_IMG}/cabello.jpg`,
-  'barba': `${BASE_IMG}/barba.jpg`,
-  'afeitado': `${BASE_IMG}/barba.jpg`,
-  'cejas': `${BASE_IMG}/cabello.jpg`,
-  'tinte': `${BASE_IMG}/cabello.jpg`,
-  'perfilado': `${BASE_IMG}/barba.jpg`,
+  'corte': `${BRO_BASE}/service-1-color.jpg`,
+  'barba': `${BRO_BASE}/service-2.jpg`,
+  'afeitado': `${BRO_BASE}/service-3-color.jpg`,
+  'cejas': `${BRO_BASE}/gallery-7.jpg`,
+  'tinte': `${BRO_BASE}/service-4-color.jpg`,
+  'perfilado': `${BRO_BASE}/gallery-6.jpg`,
 };
 
 function getServiceImage(name) {
   const key = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   if (key.includes('corte') && key.includes('barba')) {
-    return `${BASE_IMG}/cabello+barba.jpg`;
+    return `${BRO_BASE}/gallery-2.jpg`;
   }
   for (const [kw, url] of Object.entries(SERVICE_IMAGES)) {
     if (key.includes(kw)) return url;

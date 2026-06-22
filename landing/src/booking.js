@@ -227,9 +227,7 @@ export function buildServiceSelection() {
 // ─── BOOKING: BUILD STEP 3 ──────────────────────────────────
 export function buildDatePicker() {
   const input = $('#booking-date');
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  input.min = localDateString(tomorrow);
+  input.min = localDateString(new Date());
   input.value = '';
   input.focus();
 
@@ -305,7 +303,7 @@ export async function buildTimeSlots() {
 
     const appointments = await api(`/api/appointments?barberId=${state.selectedBarber}&startDate=${state.selectedDate}&endDate=${state.selectedDate}`);
 
-    const takenMinutes = appointments.map((a) => ({
+    const takenMinutes = appointments.filter((a) => a.status !== 'CANCELLED').map((a) => ({
       start: minutesSinceMidnight(a.startTime.slice(11, 16)),
       end: minutesSinceMidnight(a.endTime.slice(11, 16)),
     }));
@@ -320,6 +318,15 @@ export async function buildTimeSlots() {
         }
       });
     });
+
+    const now = new Date();
+    const todayStr = localDateString(now);
+    if (state.selectedDate === todayStr) {
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      allSlots.forEach((slot) => {
+        if (slot.start <= nowMinutes) takenSet.add(slot.label);
+      });
+    }
 
     container.innerHTML = allSlots
       .map((slot) => {
