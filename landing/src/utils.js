@@ -11,10 +11,45 @@ export function rebuildContainer(id) {
   return fresh;
 }
 
-export async function api(path) {
+function cacheKey(path) {
+  return `api_cache::${path}`;
+}
+
+function cacheGet(path) {
+  try {
+    const raw = localStorage.getItem(cacheKey(path));
+    if (!raw) return null;
+    const { data, expires } = JSON.parse(raw);
+    return Date.now() < expires ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+function cacheSet(path, data, ttlMs = 300_000) {
+  try {
+    localStorage.setItem(cacheKey(path), JSON.stringify({ data, expires: Date.now() + ttlMs }));
+  } catch {
+    // localStorage full or unavailable — silently ignore
+  }
+}
+
+export function clearCache() {
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith('api_cache::'))
+    .forEach((k) => localStorage.removeItem(k));
+}
+
+export async function api(path, { ttl } = {}) {
+  const cached = cacheGet(path);
+  if (cached) return cached;
+
   const res = await fetch(`${API}${path}`);
   if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+  const data = await res.json();
+
+  if (ttl) cacheSet(path, data, ttl);
+  return data;
 }
 
 export async function apiPost(path, body) {
@@ -38,15 +73,12 @@ export function localDateString(date) {
 export function generateSlots(start, end, duration = 30) {
   const slots = [];
   let current = start;
-  while (current < end) {
-    const slotEnd = current + duration;
-    if (slotEnd <= end) {
-      slots.push({
-        start: current,
-        end: slotEnd,
-        label: `${String(Math.floor(current / 60)).padStart(2, '0')}:${String(current % 60).padStart(2, '0')}`,
-      });
-    }
+  while (current + duration <= end) {  // Cambiado: <= para incluir el último slot
+    slots.push({
+      start: current,
+      end: current + duration,
+      label: `${String(Math.floor(current / 60)).padStart(2, '0')}:${String(current % 60).padStart(2, '0')}`,
+    });
     current += duration;
   }
   return slots;

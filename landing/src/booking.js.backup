@@ -233,23 +233,25 @@ export function buildDatePicker() {
   const calendarContainer = document.createElement('div');
   calendarContainer.className = 'minimal-calendar';
   calendarContainer.innerHTML = `
-    <div class="month-header">
-      <button id="prev-month" class="p-1"><i class="fa-solid fa-chevron-left text-xs"></i></button>
-      <h4 id="month-title"></h4>
-      <button id="next-month" class="p-1"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+    <div class=\"month-header mb-3 flex items-center justify-between\">
+      <button id=\"prev-month\" class=\"p-1 text-barber-muted hover:text-barber-accent\"><i class=\"fa-solid fa-chevron-left text-xs\"></i></button>
+      <h4 id="month-title" class="text-sm font-medium text-barber-dark"></h4>
+      <button id=\"next-month\" class=\"p-1 text-barber-muted hover:text-barber-accent\"><i class=\"fa-solid fa-chevron-right text-xs\"></i></button>
     </div>
-    <div class="days-grid">
-      <div>D</div>
-      <div>L</div>
-      <div>M</div>
-      <div>X</div>
-      <div>J</div>
-      <div>V</div>
-      <div>S</div>
+    <div class=\"days-grid grid grid-cols-7 gap-1 mb-2\">
+      <!-- Days headers -->
+      <div class=\"text-xs text-barber-muted text-center\">D</div>
+      <div class=\"text-xs text-barber-muted text-center\">L</div>
+      <div class=\"text-xs text-barber-muted text-center\">M</div>
+      <div class=\"text-xs text-barber-muted text-center\">X</div>
+      <div class=\"text-xs text-barber-muted text-center\">J</div>
+      <div class=\"text-xs text-barber-muted text-center\">V</div>
+      <div class=\"text-xs text-barber-muted text-center\">S</div>
     </div>
-    <div id="calendar-days" class="days-grid"></div>
-    <div id="time-slots" class="grid grid-cols-3 gap-2 sm:grid-cols-4 mt-5"></div>
-    <p id="time-feedback" class="mt-3 text-xs text-barber-muted"></p>
+    <div id=\"calendar-days\" class=\"days-grid\">
+      <!-- Calendar days will be populated -->
+    </div>
+    <input type=\"hidden\" id=\"hidden-date-input\" value=\"\">
   `;
   
   const container = $('#date-time-container');
@@ -285,7 +287,6 @@ export function buildDatePicker() {
   });
 }
 
-// ─── CALENDAR RENDERING ────────────────────────────────────
 function renderCalendarMonth(month) {
   const daysContainer = $('#calendar-days');
   daysContainer.innerHTML = '';
@@ -293,12 +294,13 @@ function renderCalendarMonth(month) {
   const year = month.getFullYear();
   const monthIndex = month.getMonth();
   
-  // Update month title
+  // Update month title with minimal styling
   $('#month-title').textContent = month.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  $('#month-title').className = 'text-xs font-normal text-barber-dark';
   
   // Calculate first day and total days
   const firstDayDate = new Date(year, monthIndex, 1);
-  const firstDayOfWeek = firstDayDate.getDay(); // 0=Domingo, 1=Lunes, etc.
+  const firstDayOfWeek = firstDayDate.getDay();
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
   
   // Add empty cells for days before the first
@@ -317,18 +319,16 @@ function renderCalendarMonth(month) {
     dayDate.setHours(0, 0, 0, 0);
     
     const dayElement = document.createElement('button');
-    dayElement.className = 'day-btn';
+    dayElement.className = 'day-btn h-8 w-full text-xs';
     dayElement.textContent = dayNum;
-    
-    // Highlight today
-    if (dayDate.getTime() === today.getTime()) {
-      dayElement.classList.add('today');
-    }
     
     // Day states
     if (dayDate < today) {
       dayElement.disabled = true;
+      dayElement.classList.add('text-stone-300', 'cursor-default');
     } else {
+      dayElement.classList.add('text-barber-dark', 'hover:bg-stone-100');
+      
       if (state.selectedDate === localDateString(dayDate)) {
         dayElement.classList.add('selected-day');
       } else {
@@ -354,33 +354,194 @@ function renderCalendarMonth(month) {
     daysContainer.appendChild(dayElement);
   }
 }
+  
+  // Calculate first day and total days
+  const firstDayDate = new Date(year, monthIndex, 1);
+  const firstDayOfWeek = firstDayDate.getDay();
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  
+  // Add empty cells for days before the first
+  for (let i = 0; i < firstDayOfWeek; i++) {
+    const emptyCell = document.createElement('div');
+    emptyCell.className = 'h-8'; // Reserve space for alignment
+    daysContainer.appendChild(emptyCell);
+  }
+  
+  // Add days of the month
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+    const dayDate = new Date(year, monthIndex, dayNum);
+    dayDate.setHours(0, 0, 0, 0);
+    
+    const dayElement = document.createElement('button');
+    dayElement.className = 'day-btn h-8 w-full text-xs';
+    dayElement.textContent = dayNum;
+    
+    // Day states
+    if (dayDate < today) {
+      dayElement.disabled = true;
+      dayElement.classList.add('text-stone-300', 'cursor-default');
+    } else {
+      dayElement.classList.add('text-barber-dark', 'hover:bg-stone-100');
+      
+      if (state.selectedDate === localDateString(dayDate)) {
+        dayElement.classList.add('selected-day');
+      } else {
+        dayElement.addEventListener('click', () => {
+          state.selectedDate = localDateString(dayDate);
+          state.selectedTime = '';
+          hideFeedback();
+          
+          // Update selection
+          document.querySelectorAll('.day-btn').forEach(btn => {
+            btn.classList.remove('selected-day');
+          });
+          dayElement.classList.add('selected-day');
+          
+          // Sync with hidden input
+          $('#booking-date').value = state.selectedDate;
+          
+          buildTimeSlots();
+        });
+      }
+    }
+    
+    daysContainer.appendChild(dayElement);
+  }
+}
+  
+  // Calculate first day and total days
+  const firstDayDate = new Date(year, monthIndex, 1);
+  const firstDayOfWeek = firstDayDate.getDay();
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  
+  // Add empty cells for days before the first
+  for (let i = 0; i < firstDayOfWeek; i++) {
+    const emptyCell = document.createElement('div');
+    emptyCell.className = 'h-8'; // Reserve space for alignment
+    daysContainer.appendChild(emptyCell);
+  }
+  
+  // Add days of the month
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  for (let dayNum = 1; dayNum <= daysInMonth; dayNum++) {
+    const dayDate = new Date(year, monthIndex, dayNum);
+    dayDate.setHours(0, 0, 0, 0);
+    
+    const dayElement = document.createElement('button');
+    dayElement.className = 'day-btn h-8 w-full text-xs';
+    dayElement.textContent = dayNum;
+    
+    // Day states
+    if (dayDate < today) {
+      dayElement.disabled = true;
+      dayElement.classList.add('text-stone-300', 'cursor-default');
+    } else {
+      dayElement.classList.add('text-barber-dark', 'hover:bg-stone-100');
+      
+      if (state.selectedDate === localDateString(dayDate)) {
+        dayElement.classList.add('selected-day');
+      } else {
+        dayElement.addEventListener('click', () => {
+          state.selectedDate = localDateString(dayDate);
+          state.selectedTime = '';
+          hideFeedback();
+          
+          // Update selection
+          document.querySelectorAll('.day-btn').forEach(btn => {
+            btn.classList.remove('selected-day');
+          });
+          dayElement.classList.add('selected-day');
+          
+          // Sync with hidden input
+          $('#booking-date').value = state.selectedDate;
+          
+          buildTimeSlots();
+        });
+      }
+    }
+    
+    daysContainer.appendChild(dayElement);
+  }
+}
+  
+  // Get first day of month and number of days
+  const firstDay = new Date(year, monthIndex, 1);
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const startingDay = firstDay.getDay();
+  
+  // Add empty cells for days before the first
+  for (let i = 0; i < startingDay; i++) {
+    const emptyDay = document.createElement('div');
+    emptyDay.className = 'h-6'; // Reserve space for grid alignment
+    daysContainer.appendChild(emptyDay);
+  }
+  
+  // Add days of the month
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayElement = document.createElement('button');
+    dayElement.className = 'day-btn h-8 w-full text-xs transition';
+    
+    const dayDate = new Date(year, monthIndex, day);
+    dayDate.setHours(0, 0, 0, 0);
+    
+    dayElement.textContent = day;
+    
+    // Minimal day styling - only show today and selected states
+    if (dayDate.getTime() === today.getTime()) {
+      dayElement.classList.add('text-barber-accent', 'font-medium');
+    }
+    
+    if (state.selectedDate === localDateString(dayDate)) {
+      dayElement.classList.add('selected-day');
+    }
+    
+    // Clean date handling
+    if (dayDate < today) {
+      dayElement.disabled = true;
+      dayElement.classList.add('text-stone-300', 'cursor-default');
+    } else {
+      dayElement.classList.add('text-barber-dark');
+      dayElement.classList.add('hover:bg-stone-100');
+      dayElement.addEventListener('click', () => {
+        state.selectedDate = localDateString(dayDate);
+        state.selectedTime = '';
+        hideFeedback();
+        
+        // Update selection state
+        document.querySelectorAll('.day-btn').forEach(btn => {
+          btn.classList.remove('selected-day');
+        });
+        dayElement.classList.add('selected-day');
+        
+        // Sync with original input element
+        $('#booking-date').value = state.selectedDate;
+        
+        buildTimeSlots();
+      });
+    }
+    
+    daysContainer.appendChild(dayElement);
+  }
+}
 
+function localDateString(date) {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 async function buildTimeSlots() {
-  console.log('[DEBUG] buildTimeSlots llamado con:', {
-    selectedDate: state.selectedDate,
-    selectedBarber: state.selectedBarber,
-    selectedServices: state.selectedServices.length
-  });
-
   const container = $('#time-slots');
   const feedback = $('#time-feedback');
 
-  // Verificar datos mínimos
-  if (!state.selectedDate) {
-    console.log('[DEBUG] Falta fecha seleccionada');
-    container.innerHTML = `<p class="col-span-full text-center text-xs text-barber-muted">${t('booking.selectDateFirst')}</p>`;
-    return;
-  }
-  
-  if (!state.selectedBarber) {
-    console.log('[DEBUG] Falta barbero seleccionado');
-    container.innerHTML = `<p class="col-span-full text-center text-xs text-barber-muted">${t('booking.missingData')}</p>`;
-    return;
-  }
-  
-  if (state.selectedServices.length === 0) {
-    console.log('[DEBUG] Falta servicio seleccionado');
+  if (!state.selectedDate || !state.selectedBarber || state.selectedServices.length === 0) {
     container.innerHTML = `<p class="col-span-full text-center text-xs text-barber-muted">${t('booking.missingData')}</p>`;
     return;
   }
@@ -392,45 +553,25 @@ async function buildTimeSlots() {
 
   try {
     const date = new Date(state.selectedDate + 'T12:00:00');
-    const dayOfWeek = date.getDay(); // 0=Domingo, 1=Lunes, etc.
-    console.log('[DEBUG] Día de la semana:', dayOfWeek);
+    const dayOfWeek = date.getDay();
 
-    // Obtener horarios del barbero
-    let schedules, daySchedule;
-    try {
-      schedules = await api(`/api/barbers/${state.selectedBarber}/schedules`);
-      console.log('[DEBUG] Schedules obtenidos:', schedules);
-      daySchedule = schedules.find((s) => s.dayOfWeek === dayOfWeek);
-      console.log('[DEBUG] Day schedule:', daySchedule);
-    } catch (e) {
-      console.error('[DEBUG] Error al obtener schedules:', e);
-      container.innerHTML = `<p class="col-span-full text-center text-xs text-red-500">Error al cargar horarios del barbero</p>`;
-      return;
-    }
+    const schedules = await api(`/api/barbers/${state.selectedBarber}/schedules`);
+    const daySchedule = schedules.find((s) => s.dayOfWeek === dayOfWeek);
 
     if (!daySchedule) {
-      console.log('[DEBUG] El barbero no trabaja este día');
       container.innerHTML = `<p class="col-span-full text-center text-xs text-amber-700"><i class="fa-regular fa-calendar-xmark mr-1"></i>${t('booking.notWorking')}</p>`;
       return;
     }
 
-    // Obtener overrides (horarios especiales)
-    let overrides = [], dayOverride;
-    try {
-      overrides = await api(`/api/barbers/${state.selectedBarber}/overrides`);
-      dayOverride = overrides.find((o) => o.date === state.selectedDate);
-      console.log('[DEBUG] Day override:', dayOverride);
-    } catch (e) {
-      console.error('[DEBUG] Error al obtener overrides:', e);
-    }
+    const overrides = await api(`/api/barbers/${state.selectedBarber}/overrides`);
+    const dayOverride = overrides.find((o) => o.date === state.selectedDate);
 
-    // Calcular horario disponible
     const scheduleStart = minutesSinceMidnight(daySchedule.startTime);
     const scheduleEnd = minutesSinceMidnight(daySchedule.endTime);
-    
+
     let availStart = scheduleStart;
     let availEnd = scheduleEnd;
-    
+
     if (dayOverride) {
       const overrideStart = minutesSinceMidnight(dayOverride.startTime);
       const overrideEnd = minutesSinceMidnight(dayOverride.endTime);
@@ -458,54 +599,15 @@ async function buildTimeSlots() {
       }
     }
 
-    console.log('[DEBUG] Horario disponible:', { availStart, availEnd });
+    const appointments = await api(`/api/appointments?barberId=${state.selectedBarber}&startDate=${state.selectedDate}&endDate=${state.selectedDate}`);
 
-    // Obtener citas existentes
-    let appointments = [];
-    try {
-      appointments = await api(`/api/appointments?barberId=${state.selectedBarber}&startDate=${state.selectedDate}&endDate=${state.selectedDate}`);
-      console.log('[DEBUG] Appointments obtenidos:', appointments);
-    } catch (e) {
-      console.error('[DEBUG] Error al obtener appointments:', e);
-      container.innerHTML = `<p class="col-span-full text-center text-xs text-red-500">Error al cargar citas existentes</p>`;
-      return;
-    }
-
-    // Filtrar citas ocupadas (excluyendo canceladas)
     const takenMinutes = appointments.filter((a) => a.status !== 'CANCELLED').map((a) => ({
       start: minutesSinceMidnight(a.startTime.slice(11, 16)),
       end: minutesSinceMidnight(a.endTime.slice(11, 16)),
     }));
-    console.log('[DEBUG] Horas ocupadas:', takenMinutes);
 
-    // Verificar duración válida
-    const duration = totalDuration();
-    console.log('[DEBUG] Duración total del servicio:', duration, 'minutos');
-    
-    if (duration <= 0) {
-      console.error('[DEBUG] Duración inválida:', duration);
-      container.innerHTML = `<p class="col-span-full text-center text-xs text-red-500">Duración del servicio inválida</p>`;
-      return;
-    }
-    
-    // Verificar horario válido
-    if (availStart >= availEnd) {
-      console.error('[DEBUG] Horario inválido:', { availStart, availEnd });
-      container.innerHTML = `<p class="col-span-full text-center text-xs text-amber-700">El barbero no tiene horarios disponibles este día</p>`;
-      return;
-    }
-    
-    // Generar slots disponibles
-    const allSlots = generateSlots(availStart, availEnd, duration);
-    console.log('[DEBUG] Todos los slots generados:', allSlots);
-    
-    if (allSlots.length === 0) {
-      console.error('[DEBUG] No se generaron slots:', { availStart, availEnd, duration });
-      container.innerHTML = `<p class="col-span-full text-center text-xs text-amber-700">No hay horarios disponibles para la duración seleccionada</p>`;
-      return;
-    }
+    const allSlots = generateSlots(availStart, availEnd, totalDuration());
 
-    // Marcar slots ocupados
     const takenSet = new Set();
     takenMinutes.forEach((t) => {
       allSlots.forEach((slot) => {
@@ -515,7 +617,6 @@ async function buildTimeSlots() {
       });
     });
 
-    // Filtrar slots pasados si es hoy
     const now = new Date();
     const todayStr = localDateString(now);
     if (state.selectedDate === todayStr) {
@@ -525,28 +626,22 @@ async function buildTimeSlots() {
       });
     }
 
-    // Renderizar slots
-    if (allSlots.length === 0) {
-      container.innerHTML = `<p class="col-span-full text-center text-xs text-amber-700">No hay horarios disponibles para este día</p>`;
-    } else {
-      container.innerHTML = allSlots
-        .map((slot) => {
-          const taken = takenSet.has(slot.label);
-          const isSelected = state.selectedTime === slot.label && !taken;
-          return `
-        <button
-          class="time-slot rounded-lg border-2 px-3 py-2 text-center text-sm font-medium transition ${taken ? 'border-stone-100 bg-stone-50 text-stone-300 line-through cursor-not-allowed' : isSelected ? 'border-barber-accent bg-barber-accent text-white' : 'border-stone-200 text-barber-dark hover:border-barber-accent hover:bg-amber-50'}"
-          data-start="${slot.label}"
-          ${taken ? 'disabled' : ''}
-        >
-          ${taken ? t('booking.occupied') : slot.label}
-        </button>
-      `;
-        })
-        .join('');
-    }
+    container.innerHTML = allSlots
+      .map((slot) => {
+        const taken = takenSet.has(slot.label);
+        const isSelected = state.selectedTime === slot.label && !taken;
+        return `
+      <button
+        class="time-slot rounded-lg border-2 px-3 py-2 text-center text-sm font-medium transition ${taken ? 'border-stone-100 bg-stone-50 text-stone-300 line-through cursor-not-allowed' : isSelected ? 'border-barber-accent bg-barber-accent text-white' : 'border-stone-200 text-barber-dark hover:border-barber-accent hover:bg-amber-50'}"
+        data-start="${slot.label}"
+        ${taken ? 'disabled' : ''}
+      >
+        ${taken ? t('booking.occupied') : slot.label}
+      </button>
+    `;
+      })
+      .join('');
 
-    // Configurar evento de clic
     container.addEventListener('click', (e) => {
       const btn = e.target.closest('.time-slot');
       if (!btn || btn.disabled) return;
@@ -559,18 +654,15 @@ async function buildTimeSlots() {
       hideFeedback();
     });
 
-    // Mostrar feedback
     const free = allSlots.length - takenSet.size;
     if (free === 0) {
       feedback.innerHTML = `<span class="text-amber-700"><i class="fa-regular fa-clock mr-1"></i>${t('booking.noSlots')}</span>`;
     } else {
       feedback.textContent = tn('booking.slotsAvailable', free);
     }
-    
-    console.log('[DEBUG] buildTimeSlots completado con éxito');
   } catch (e) {
-    console.error('[DEBUG] Error en buildTimeSlots:', e);
-    container.innerHTML = `<p class="col-span-full text-center text-xs text-red-500">${t('booking.error')}: ${e.message}</p>`;
+    container.innerHTML = `<p class="col-span-full text-center text-xs text-red-500">${t('booking.error')}</p>`;
+    console.error(e);
   }
 }
 

@@ -77,19 +77,11 @@ html {
 }
 
 .barber-card {
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .barber-card:hover {
   transform: translateY(-2px);
-}
-
-.barber-card:hover .barber-avatar {
-  border-color: var(--color-barber-accent);
-}
-
-.barber-avatar {
-  transition: border-color 0.2s ease;
 }
 
 .contact-card {
@@ -251,8 +243,111 @@ html {
   opacity: 0.6;
 }
 
-@media (max-width: 640px) {
-  .step-connector { width: 16px; margin-bottom: 25px; }
-  .step-circle { width: 28px; height: 28px; font-size: 11px; }
-  .step-label { font-size: 10px; }
+@media (min-width: 640px) {
+  .minimal-calendar {
+    max-width: 300px;
+    margin: 0 auto;
+  }
+  
+  .days-grid {
+    gap: 0.25rem;
+  }
+  
+  .day-btn {
+    height: 2.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Minimal calendar specific styles */
+.minimal-calendar {
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  background: white;
+  margin-bottom: 1.25rem;
+}
+
+.month-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.month-header h4 {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1c1917;
+  text-transform: capitalize;
+}
+
+.month-header button {
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  color: #78716c;
+  transition: all 0.15s ease;
+}
+
+.month-header button:hover {
+  background: #f5f5f4;
+  color: var(--color-barber-accent);
+}
+
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.days-grid > div {
+  text-align: center;
+  font-size: 0.65rem;
+  color: #78716c;
+  font-weight: 500;
+  padding: 0.25rem 0;
+}
+
+.day-btn {
+  height: 2.25rem;
+  width: 100%;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  color: #1c1917;
+  background: white;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.day-btn:hover:not(:disabled) {
+  background: #fef3c7;
+  color: var(--color-barber-accent);
+  border-color: #fde68a;
+}
+
+.day-btn:disabled {
+  color: #d6d3d1;
+  cursor: default;
+}
+
+.day-btn.selected-day {
+  background: var(--color-barber-accent);
+  color: white;
+  border-color: var(--color-barber-accent);
+  font-weight: 500;
+}
+
+/* Today's date highlight */
+.day-btn.today {
+  color: var(--color-barber-accent);
+  font-weight: 500;
+}
+
+/* Empty cells for alignment */
+.days-grid > div.h-8 {
+  height: 2.25rem;
 }

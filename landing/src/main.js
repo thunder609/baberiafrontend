@@ -4,7 +4,7 @@ import './hero.js';
 
 import { t, initLanguage, setLanguage, applyTranslations, currentLang } from './translations.js';
 import { $, api } from './utils.js';
-import { state } from './state.js';
+import { state, WHATSAPP_NUMBER } from './state.js';
 import { loadServices, renderServicesGrid } from './services.js';
 import { loadBarbers, renderBarbersGrid } from './barbers.js';
 import { showStep, goNext, goPrev, hideFeedback, buildBarberSelection, buildServiceSelection, buildDatePicker, submitBooking, initStepObserver } from './booking.js';
@@ -87,6 +87,22 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   await Promise.all([loadServices(), loadBarbers()]);
+
+  // Set WhatsApp link
+  const waLink = $('#whatsapp-float');
+  if (waLink) {
+    waLink.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola, quisiera reservar un turno')}`;
+  }
+
+  // Back to top
+  const backToTop = $('#back-to-top');
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  window.addEventListener('scroll', () => {
+    backToTop.classList.toggle('opacity-0', window.scrollY < 400);
+    backToTop.classList.toggle('pointer-events-none', window.scrollY < 400);
+  });
 
   buildBarberSelection();
   buildServiceSelection();

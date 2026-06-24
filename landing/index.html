@@ -216,17 +216,15 @@
           <div class="booking-panel hidden" data-step="3">
             <h3 class="mb-4 text-lg font-semibold text-barber-dark" data-i18n="booking.header3">Elegí fecha y hora</h3>
 
+            <!-- Hidden original input for backward compatibility -->
             <input
               id="booking-date"
               type="date"
-              class="w-full rounded-lg border border-stone-200 px-4 py-3 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-2 focus:ring-barber-accent/20"
+              class="hidden w-full rounded-lg border border-stone-200 px-4 py-3 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-2 focus:ring-barber-accent/20"
             />
 
             <div id="date-time-container" class="mt-5">
-              <div id="time-slots" class="grid grid-cols-3 gap-2 sm:grid-cols-4">
-                <!-- JS populate -->
-              </div>
-              <p id="time-feedback" class="mt-3 text-xs text-barber-muted"></p>
+              <!-- Minimalist calendar will be injected here -->
             </div>
           </div>
 
@@ -330,14 +328,21 @@
     <!-- ─── FOOTER ─── -->
     <footer class="border-t border-stone-800 bg-barber-dark px-4 py-8">
       <div class="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-center text-xs text-stone-500 sm:flex-row sm:text-left">
-        <p>&copy; 2026 Barbería Clásica. Todos los derechos reservados.</p>
+        <p>&copy; 2026 Barbería Clásica — Donde el clásico nunca pasa de moda</p>
         <div class="flex gap-4">
           <a href="#" class="transition hover:text-barber-accent"><i class="fa-brands fa-instagram text-base"></i></a>
-          <a href="#" class="transition hover:text-barber-accent"><i class="fa-brands fa-whatsapp text-base"></i></a>
           <a href="#" class="transition hover:text-barber-accent"><i class="fa-brands fa-facebook text-base"></i></a>
         </div>
       </div>
     </footer>
+
+    <!-- ─── FLOATING BUTTONS ─── -->
+    <a id="whatsapp-float" href="#" target="_blank" rel="noopener" class="fixed bottom-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-105" aria-label="WhatsApp">
+      <i class="fa-brands fa-whatsapp text-xl"></i>
+    </a>
+    <button id="back-to-top" class="fixed bottom-6 left-1/2 z-50 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full bg-barber-accent text-white shadow-lg transition-all duration-300 hover:bg-amber-600 hover:shadow-xl opacity-0 pointer-events-none" aria-label="Volver arriba">
+      <i class="fa-solid fa-arrow-up text-sm"></i>
+    </button>
 
     <script type="module" src="/src/main.js"></script>
   </body>

@@ -25,7 +25,7 @@ function getServiceImage(name) {
 
 export async function loadServices() {
   try {
-    state.services = await api('/api/services?onlyActive=true');
+    state.services = await api('/api/services?onlyActive=true', { ttl: 1_800_000 });
   } catch (e) {
     $('#services-grid').innerHTML = `<p class="col-span-full text-center text-sm text-barber-muted">${t('services.error')}</p>`;
     return;
