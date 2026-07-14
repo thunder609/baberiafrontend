@@ -5,6 +5,7 @@ export interface AuthUser {
   username: string;
   email: string;
   role: string;
+  barberId: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +17,9 @@ export class AuthService {
 
   readonly user = computed(() => this.userSignal());
   readonly isLoggedIn = computed(() => this.userSignal() !== null);
+  readonly isAdmin = computed(() => this.userSignal()?.role === 'ADMIN');
+  readonly isBarber = computed(() => this.userSignal()?.role === 'BARBER');
+  readonly barberId = computed(() => this.userSignal()?.barberId ?? null);
 
   constructor() {
     this.loadFromStorage();

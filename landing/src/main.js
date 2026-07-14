@@ -3,7 +3,7 @@ import './nav.js';
 import './hero.js';
 
 import { t, initLanguage, setLanguage, applyTranslations, currentLang } from './translations.js';
-import { $, api } from './utils.js';
+import { $, api, clearCache } from './utils.js';
 import { state, WHATSAPP_NUMBER } from './state.js';
 import { loadServices, renderServicesGrid } from './services.js';
 import { loadBarbers, renderBarbersGrid } from './barbers.js';
@@ -135,3 +135,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   initReveal();
   showStep(1);
 });
+
+// ─── SSE — ACTUALIZACIÓN EN TIEMPO REAL ─────────────────────
+const API_URL = import.meta.env.VITE_API_URL || '';
+const barberEvents = new EventSource(`${API_URL}/api/barbers/events`);
+barberEvents.addEventListener('update', async () => {
+  clearCache();
+  await loadBarbers();
+  buildBarberSelection();
+});
+barberEvents.onerror = () => {
+  // EventSource reconecta automáticamente
+};

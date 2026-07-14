@@ -1,8 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { signal } from '@angular/core';
+import { signal, computed } from '@angular/core';
 import { Appointments } from './appointments';
 import { of } from 'rxjs';
 import type { Appointment } from '../../core/models';
+
+function mockAuth(overrides?: Partial<{ isAdmin: boolean; isBarber: boolean; barberId: number | null }>) {
+  const { isAdmin = true, isBarber = false, barberId = null } = overrides ?? {};
+  return { isAdmin: computed(() => isAdmin), isBarber: computed(() => isBarber), barberId: computed(() => barberId) } as any;
+}
 
 function mockService(initial: any[] = []) {
   const items = signal(initial);
@@ -20,7 +25,7 @@ function mockService(initial: any[] = []) {
   };
 }
 
-function createComponent() {
+function createComponent(authOverrides?: Partial<{ isAdmin: boolean; isBarber: boolean; barberId: number | null }>) {
   const appointmentSvc = mockService();
   const barberSvc = mockService([
     { id: 1, name: 'Carlos', phone: '', email: '', active: true },
@@ -31,12 +36,14 @@ function createComponent() {
   const serviceSvc = mockService([
     { id: 1, name: 'Corte', price: 10, active: true, description: '' },
   ]);
+  const authSvc = mockAuth(authOverrides);
 
   const component = new Appointments(
     appointmentSvc as any,
     barberSvc as any,
     clientSvc as any,
     serviceSvc as any,
+    authSvc,
   );
   component.ngOnInit();
   return { component, appointmentSvc, barberSvc, clientSvc, serviceSvc };
@@ -103,7 +110,7 @@ describe('Appointments', () => {
     component.form.barberId = 1;
     component.form.clientId = 1;
     component.form.serviceId = 2;
-    component.formDate = '2026-06-01';
+    component.formDate = '2099-06-01';
     component.formTime = '14:00';
     component.save();
 
@@ -111,14 +118,15 @@ describe('Appointments', () => {
     expect(component.showForm()).toBe(false);
   });
 
-  it('should trigger reload on barber change', () => {
+  it('should trigger reload on filter change', () => {
     const { component, appointmentSvc } = createComponent();
     let loaded = false;
-    appointmentSvc.loadByBarberAndDate = (..._: any[]) => { loaded = true; };
+    const orig = appointmentSvc.loadByFilter;
+    appointmentSvc.loadByFilter = (..._: any[]) => { loaded = true; };
 
-    component.selectedBarberId = 1;
-    component.onBarberChange();
+    component.loadAppointments();
     expect(loaded).toBe(true);
+    appointmentSvc.loadByFilter = orig;
   });
 
   describe('validation', () => {

@@ -1,4 +1,4 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, computed } from '@angular/core';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
@@ -42,7 +42,7 @@ import { AuthService } from '../../core/services/auth.service';
         </button>
       </div>
       <nav class="flex flex-col gap-0.5">
-        @for (item of navItems; track item.path) {
+        @for (item of navItems(); track item.path) {
           <a
             [routerLink]="item.path"
             (click)="close.emit()"
@@ -55,8 +55,17 @@ import { AuthService } from '../../core/services/auth.service';
       </nav>
 
       <div class="mt-auto border-t border-barber-mid pt-3">
-        <div class="mb-2 px-3 text-xs text-stone-500">
+        <div class="mb-2 flex items-center gap-2 px-3 text-xs text-stone-500">
           {{ auth.user()?.username }}
+          <span
+            class="inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
+            [class.bg-amber-500/20]="auth.isAdmin()"
+            [class.text-amber-400]="auth.isAdmin()"
+            [class.bg-sky-500/20]="auth.isBarber()"
+            [class.text-sky-400]="auth.isBarber()"
+          >
+            {{ auth.isAdmin() ? 'Admin' : 'Barbero' }}
+          </span>
         </div>
         <a
           [routerLink]="'/change-password'"
@@ -81,13 +90,24 @@ export class Sidebar {
   protected readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  protected readonly navItems = [
-    { path: '/', label: 'Inicio' },
-    { path: '/clients', label: 'Clientes' },
-    { path: '/barbers', label: 'Barberos' },
-    { path: '/services', label: 'Servicios' },
-    { path: '/appointments', label: 'Turnos' },
-  ];
+  protected readonly navItems = computed(() => {
+    const barberId = this.auth.barberId();
+    if (this.auth.isAdmin()) {
+      return [
+        { path: '/', label: 'Inicio' },
+        { path: '/clients', label: 'Clientes' },
+        { path: '/barbers', label: 'Barberos' },
+        { path: '/services', label: 'Servicios' },
+        { path: '/appointments', label: 'Turnos' },
+      ];
+    }
+    return [
+      { path: '/', label: 'Inicio' },
+      { path: '/appointments', label: 'Turnos' },
+      ...(barberId ? [{ path: `/barbers/${barberId}/schedules`, label: 'Horarios' }] : []),
+      ...(barberId ? [{ path: `/barbers/${barberId}/overrides`, label: 'Excepciones' }] : []),
+    ];
+  });
 
   protected logout(): void {
     this.auth.logout();

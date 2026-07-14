@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   template: `
     <div class="flex min-h-dvh items-center justify-center bg-gradient-to-br from-stone-900 via-stone-800 to-amber-950 p-4">
       <div class="w-full max-w-sm rounded-xl bg-white p-8 shadow-2xl">
@@ -48,6 +48,10 @@ import { environment } from '../../../../environments/environment';
           @if (error()) {
             <p class="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600">{{ error() }}</p>
           }
+
+          <a routerLink="/forgot-password" class="text-right text-xs text-stone-500 hover:text-amber-600 transition">
+            Olvidé mi contraseña
+          </a>
 
           <button
             type="submit"
@@ -94,7 +98,7 @@ export class Login {
       }
 
       const data = await res.json();
-      this.auth.login({ token: data.token, username: data.username, email: data.email, role: data.role });
+      this.auth.login({ token: data.token, username: data.username, email: data.email, role: data.role, barberId: data.barberId ?? null });
       await this.router.navigate(['/']);
     } catch {
       this.error.set('No se pudo conectar con el servidor');

@@ -28,4 +28,8 @@ export class BarberService {
   deactivate(id: number) {
     return this.http.patch<void>(`/api/barbers/${id}/deactivate`, {});
   }
+
+  delete(id: number) {
+    return this.http.delete<void>(`/api/barbers/${id}`);
+  }
 }

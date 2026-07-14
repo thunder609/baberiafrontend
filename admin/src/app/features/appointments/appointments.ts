@@ -1,5 +1,6 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../core/services/auth.service';
 import { AppointmentService } from '../../core/services/appointment.service';
 import { BarberService } from '../../core/services/barber.service';
 import { ClientService } from '../../core/services/client.service';
@@ -30,16 +31,18 @@ import type { AppointmentRequest } from '../../core/models';
       </div>
 
       <div class="mb-5 flex flex-wrap gap-3">
-        <select
-          [(ngModel)]="selectedBarberId"
-          (change)="loadAppointments()"
-          class="rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent"
-        >
-          <option [ngValue]="null">Todos los barberos</option>
-          @for (b of barberService.items(); track b.id) {
-            <option [ngValue]="b.id">{{ b.name }}</option>
-          }
-        </select>
+        @if (auth.isAdmin()) {
+          <select
+            [(ngModel)]="selectedBarberId"
+            (change)="loadAppointments()"
+            class="rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent"
+          >
+            <option [ngValue]="null">Todos los barberos</option>
+            @for (b of barberService.items(); track b.id) {
+              <option [ngValue]="b.id">{{ b.name }}</option>
+            }
+          </select>
+        }
         <div class="flex items-center gap-2">
           <label class="text-xs font-medium text-barber-muted">Desde</label>
           <input
@@ -144,15 +147,17 @@ import type { AppointmentRequest } from '../../core/models';
         <div class="w-full max-w-sm rounded-xl border border-stone-200 bg-white p-6 shadow-2xl" (click)="$event.stopPropagation()">
           <h3 class="mb-5 text-base font-bold text-barber-dark">Nuevo turno</h3>
 
-          <div class="mb-3">
-            <label class="mb-1 block text-xs font-medium text-barber-muted">Barbero</label>
-            <select [(ngModel)]="form.barberId" class="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent">
-              <option [ngValue]="null">Seleccionar</option>
-              @for (b of barberService.items(); track b.id) {
-                <option [ngValue]="b.id">{{ b.name }}</option>
-              }
-            </select>
-          </div>
+          @if (auth.isAdmin()) {
+            <div class="mb-3">
+              <label class="mb-1 block text-xs font-medium text-barber-muted">Barbero</label>
+              <select [(ngModel)]="form.barberId" class="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent">
+                <option [ngValue]="null">Seleccionar</option>
+                @for (b of barberService.items(); track b.id) {
+                  <option [ngValue]="b.id">{{ b.name }}</option>
+                }
+              </select>
+            </div>
+          }
           <div class="mb-3">
             <label class="mb-1 block text-xs font-medium text-barber-muted">Cliente</label>
             <select [(ngModel)]="form.clientId" class="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent">
@@ -289,14 +294,23 @@ export class Appointments implements OnInit {
   protected reassignTime = '';
   protected reassignServiceId: number | null = null;
 
+  protected readonly auth: AuthService;
+
   constructor(
     protected appointmentService: AppointmentService,
     protected barberService: BarberService,
     protected clientService: ClientService,
     protected serviceService: ServiceService,
-  ) {}
+    authService?: AuthService,
+  ) {
+    this.auth = authService ?? inject(AuthService);
+  }
 
   ngOnInit() {
+    // BARBER users auto-filter to their own barber
+    if (this.auth.isBarber() && this.auth.barberId()) {
+      this.selectedBarberId = this.auth.barberId();
+    }
     this.barberService.loadAll(true);
     this.clientService.loadAll();
     this.serviceService.loadAll(true);
@@ -347,7 +361,7 @@ export class Appointments implements OnInit {
   }
 
   protected openNew() {
-    this.form.barberId = null as unknown as number;
+    this.form.barberId = this.auth.isBarber() ? this.auth.barberId()! : (null as unknown as number);
     this.form.clientId = null as unknown as number;
     this.form.serviceId = null as unknown as number;
     this.form.notes = '';

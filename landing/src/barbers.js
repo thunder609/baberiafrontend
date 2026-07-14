@@ -23,8 +23,7 @@ export function renderBarbersGrid() {
   grid.innerHTML = state.barbers
     .map((b, i) => {
       const delay = Math.min(100 + i * 100, 600);
-      const imgIdx = (i % 4) + 1;
-      const img = `${BRO_BASE}/barber-${imgIdx}.jpg`;
+      const img = b.photoUrl || `${BRO_BASE}/barber-${(i % 4) + 1}.jpg`;
       return `
       <div class="barber-card reveal reveal-up delay-${delay} group rounded-lg border border-stone-700/50 bg-stone-800/30 p-5 text-center transition hover:bg-stone-800/60">
         <div class="mx-auto h-28 w-28 overflow-hidden rounded-full">
