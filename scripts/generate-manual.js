@@ -359,6 +359,21 @@ bodyText(
   'Serás redirigido a la pantalla de inicio de sesión.'
 );
 
+subSubSectionTitle('Olvidé mi Contraseña');
+bodyText(
+  'Si olvidaste tu contraseña, en la pantalla de inicio de sesión haz clic en el enlace ' +
+  '"Olvidé mi contraseña". Se te solicitará tu correo electrónico registrado y recibirás ' +
+  'instrucciones para restablecerla.'
+);
+
+step(1, 'Ir al login', 'Navega a la pantalla de inicio de sesión del panel de administración.');
+step(2, 'Hacer clic en "Olvidé mi contraseña"', 'El enlace está debajo del formulario de ingreso.');
+step(3, 'Ingresar correo electrónico', 'Escribe el correo asociado a tu cuenta.');
+step(4, 'Revisar tu bandeja de entrada', 'Recibirás un enlace para restablecer tu contraseña. ' +
+  'Sigue las instrucciones del correo para crear una nueva contraseña.');
+
+infoBox('El correo de restablecimiento se envía de forma inmediata. Si no lo ves en tu bandeja de entrada, revisá la carpeta de spam o correo no deseado.');
+
 // 3.2 Gestión de Clientes
 subSectionTitle('3.2 Gestión de Clientes');
 
@@ -419,6 +434,30 @@ bodyText(
 bullet('No aparecerá en el sitio público');
 bullet('No se podrán crear nuevos turnos para él');
 bullet('Los turnos existentes no se ven afectados');
+
+subSubSectionTitle('Subir Imagen de Barbero');
+bodyText(
+  'Puedes asignar una foto de perfil a cada barbero. La imagen se muestra en la Landing Page ' +
+  'junto al nombre del barbero.'
+);
+step(1, 'Abrir edición', 'Haz clic en el ícono de editar (lápiz) junto al barbero.');
+step(2, 'Seleccionar imagen', 'Haz clic en el botón "Subir Imagen" o el área designada para la foto.');
+step(3, 'Elegir archivo', 'Selecciona una imagen desde tu computadora. Formatos recomendados: JPG o PNG.');
+step(4, 'Guardar', 'Confirma para guardar el barbero con su nueva imagen.');
+
+tipBox('Se recomienda usar imágenes cuadradas de al menos 400×400 píxeles para una mejor visualización.');
+
+subSubSectionTitle('Establecer / Editar Contraseña del Barbero');
+bodyText(
+  'Puedes asignar o cambiar la contraseña de un barbero desde el panel. Esto permite que el ' +
+  'barbero acceda al sistema con sus propias credenciales.'
+);
+step(1, 'Abrir edición', 'Haz clic en el ícono de editar (lápiz) junto al barbero.');
+step(2, 'Campo contraseña', 'En el formulario de edición, verás un campo para ingresar una nueva contraseña.');
+step(3, 'Ingresar contraseña', 'Escribe la nueva contraseña para el barbero.');
+step(4, 'Guardar', 'Confirma para guardar los cambios. El barbero podrá iniciar sesión con su nueva contraseña.');
+
+warningBox('Si no completas el campo de contraseña, la contraseña actual del barbero se mantiene sin cambios.');
 
 subSubSectionTitle('Horarios y Excepciones');
 bodyText(
@@ -606,7 +645,7 @@ const faqs = [
   },
   {
     q: 'Olvidé mi contraseña, ¿cómo la recupero?',
-    a: 'Contacta al administrador del sistema para que restablezca tu contraseña. Actualmente no hay un sistema de recuperación automática.',
+    a: 'En la pantalla de inicio de sesión, haz clic en "Olvidé mi contraseña". Ingresa tu correo electrónico y recibirás un enlace para restablecerla.',
   },
   {
     q: '¿Puedo tener el sistema en inglés?',
@@ -631,6 +670,14 @@ const faqs = [
   {
     q: '¿Los cambios en horarios afectan turnos ya reservados?',
     a: 'No. Los cambios en horarios y excepciones solo afectan la disponibilidad futura. Los turnos ya reservados no se ven afectados.',
+  },
+  {
+    q: '¿Cómo le asigno una foto a un barbero?',
+    a: 'Edita el barbero desde el panel de administración y usa el botón "Subir Imagen" para seleccionar una foto desde tu computadora.',
+  },
+  {
+    q: '¿Cómo le cambio la contraseña a un barbero?',
+    a: 'Edita el barbero desde el panel de administración. En el formulario de edición encontrarás un campo para establecer o cambiar su contraseña.',
   },
 ];
 

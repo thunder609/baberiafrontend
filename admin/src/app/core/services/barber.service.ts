@@ -1,35 +1,52 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal } from '@angular/core';
 import type { Barber, BarberRequest } from '../models';
+import { SupabaseService } from './supabase.service';
+import { environment } from '../../../environments/environment';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class BarberService {
   readonly items = signal<Barber[]>([]);
+  private apiUrl = `${environment.apiUrl}/api/barbers`;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private supabaseService: SupabaseService
+  ) {}
 
   loadAll(onlyActive = false) {
     const params = onlyActive ? '?onlyActive=true' : '';
-    this.http.get<Barber[]>(`/api/barbers${params}`).subscribe((data) => this.items.set(data));
+    this.http.get<Barber[]>(`${this.apiUrl}${params}`).subscribe((data) => this.items.set(data));
   }
 
-  create(request: BarberRequest) {
-    return this.http.post<Barber>('/api/barbers', request);
+  async create(request: BarberRequest, imageFile?: File): Promise<Barber> {
+    let photoUrl = request.photoUrl || '';
+    if (imageFile) {
+      photoUrl = await this.supabaseService.uploadBarberImage(imageFile, 'new');
+    }
+    const barberData = { ...request, photoUrl };
+    return lastValueFrom(this.http.post<Barber>(this.apiUrl, barberData));
   }
 
-  update(id: number, request: BarberRequest) {
-    return this.http.put<Barber>(`/api/barbers/${id}`, request);
+  async update(id: number, request: BarberRequest, imageFile?: File): Promise<Barber> {
+    let photoUrl = request.photoUrl || '';
+    if (imageFile) {
+      photoUrl = await this.supabaseService.uploadBarberImage(imageFile, id.toString());
+    }
+    const barberData = { ...request, photoUrl };
+    return lastValueFrom(this.http.put<Barber>(`${this.apiUrl}/${id}`, barberData));
   }
 
-  activate(id: number) {
-    return this.http.patch<void>(`/api/barbers/${id}/activate`, {});
+  async activate(id: number): Promise<void> {
+    await lastValueFrom(this.http.patch<void>(`${this.apiUrl}/${id}/activate`, {}));
   }
 
-  deactivate(id: number) {
-    return this.http.patch<void>(`/api/barbers/${id}/deactivate`, {});
+  async deactivate(id: number): Promise<void> {
+    await lastValueFrom(this.http.patch<void>(`${this.apiUrl}/${id}/deactivate`, {}));
   }
 
-  delete(id: number) {
-    return this.http.delete<void>(`/api/barbers/${id}`);
+  async delete(id: number): Promise<void> {
+    await lastValueFrom(this.http.delete<void>(`${this.apiUrl}/${id}`));
   }
 }

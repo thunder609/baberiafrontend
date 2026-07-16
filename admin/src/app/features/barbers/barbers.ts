@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { BarberService } from '../../core/services/barber.service';
 import type { Barber, BarberRequest } from '../../core/models';
 
@@ -154,7 +153,7 @@ import type { Barber, BarberRequest } from '../../core/models';
           <div class="flex justify-end gap-2">
             <button (click)="closeForm()" class="rounded-lg border border-stone-200 px-4 py-2 text-sm font-medium text-barber-muted transition hover:bg-stone-50">Cancelar</button>
             <button (click)="save()" [disabled]="uploading()" class="rounded-lg bg-barber-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-600 disabled:opacity-60">
-              Guardar
+              {{ uploading() ? 'Subiendo…' : 'Guardar' }}
             </button>
           </div>
         </div>
@@ -163,7 +162,7 @@ import type { Barber, BarberRequest } from '../../core/models';
   `,
 })
 export class Barbers implements OnInit {
-  private readonly http = inject(HttpClient);
+  private selectedFile: File | null = null;
 
   protected readonly showForm = signal(false);
   protected readonly editingId = signal<number | null>(null);
@@ -184,6 +183,7 @@ export class Barbers implements OnInit {
     this.form.photoUrl = '';
     this.previewUrl.set(null);
     this.editingId.set(null);
+    this.selectedFile = null;
     this.showForm.set(true);
   }
 
@@ -194,6 +194,7 @@ export class Barbers implements OnInit {
     this.form.photoUrl = barber.photoUrl;
     this.previewUrl.set(barber.photoUrl || null);
     this.editingId.set(barber.id);
+    this.selectedFile = null;
     this.showForm.set(true);
   }
 
@@ -206,47 +207,52 @@ export class Barbers implements OnInit {
     const file = input.files?.[0];
     if (!file) return;
 
+    this.selectedFile = file;
+
     // Preview local
     const reader = new FileReader();
     reader.onload = () => this.previewUrl.set(reader.result as string);
     reader.readAsDataURL(file);
-
-    // Subir al backend
-    this.uploading.set(true);
-    const formData = new FormData();
-    formData.append('file', file);
-
-    this.http.post<{ url: string }>('/api/upload', formData).subscribe({
-      next: (res) => {
-        this.form.photoUrl = res.url;
-        this.uploading.set(false);
-      },
-      error: () => {
-        this.uploading.set(false);
-      },
-    });
   }
 
-  protected save() {
-    const obs = this.editingId()
-      ? this.service.update(this.editingId()!, { ...this.form })
-      : this.service.create({ ...this.form });
-
-    obs.subscribe(() => {
+  protected async save() {
+    this.uploading.set(true);
+    try {
+      if (this.editingId()) {
+        await this.service.update(this.editingId()!, { ...this.form }, this.selectedFile || undefined);
+      } else {
+        await this.service.create({ ...this.form }, this.selectedFile || undefined);
+      }
       this.closeForm();
       this.service.loadAll();
-    });
+    } catch (error) {
+      console.error('Error al guardar barbero:', error);
+      alert('Error al guardar barbero');
+    } finally {
+      this.uploading.set(false);
+    }
   }
 
-  protected toggleActive(barber: Barber) {
-    const obs = barber.active
-      ? this.service.deactivate(barber.id)
-      : this.service.activate(barber.id);
-    obs.subscribe(() => this.service.loadAll());
+  protected async toggleActive(barber: Barber) {
+    try {
+      if (barber.active) {
+        await this.service.deactivate(barber.id);
+      } else {
+        await this.service.activate(barber.id);
+      }
+      this.service.loadAll();
+    } catch (error) {
+      console.error('Error al cambiar estado:', error);
+    }
   }
 
-  protected deleteBarber(barber: Barber) {
+  protected async deleteBarber(barber: Barber) {
     if (!confirm(`¿Eliminar a ${barber.name}? Esta acción no se puede deshacer.`)) return;
-    this.service.delete(barber.id).subscribe(() => this.service.loadAll());
+    try {
+      await this.service.delete(barber.id);
+      this.service.loadAll();
+    } catch (error) {
+      console.error('Error al eliminar barbero:', error);
+    }
   }
 }
