@@ -7,7 +7,7 @@ import type { BarberService, ServiceRequest } from '../../core/models';
   selector: 'app-services',
   imports: [FormsModule],
   template: `
-    <div class="mx-auto max-w-2xl">
+    <div class="mx-auto max-w-3xl">
       <div class="mb-6 flex items-center justify-between">
         <h2 class="text-xl font-bold tracking-tight text-barber-dark">Servicios</h2>
         <button
@@ -22,7 +22,7 @@ import type { BarberService, ServiceRequest } from '../../core/models';
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b border-stone-200 bg-stone-50 text-left text-xs font-semibold uppercase tracking-wider text-barber-muted">
-              <th class="px-4 py-3">Nombre</th>
+              <th class="px-4 py-3">Servicio</th>
               <th class="px-4 py-3">Duración</th>
               <th class="px-4 py-3">Precio</th>
               <th class="px-4 py-3">Estado</th>
@@ -32,7 +32,20 @@ import type { BarberService, ServiceRequest } from '../../core/models';
           <tbody>
             @for (svc of service.items(); track svc.id) {
               <tr class="border-b border-stone-100 transition hover:bg-stone-50">
-                <td class="px-4 py-3 font-medium text-barber-dark">{{ svc.name }}</td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-3">
+                    <div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-stone-100">
+                      @if (svc.imageUrl) {
+                        <img [src]="svc.imageUrl" alt="" class="h-full w-full object-cover" />
+                      } @else {
+                        <div class="flex h-full items-center justify-center text-sm text-stone-300">
+                          <i class="fa-regular fa-image"></i>
+                        </div>
+                      }
+                    </div>
+                    <span class="font-medium text-barber-dark">{{ svc.name }}</span>
+                  </div>
+                </td>
                 <td class="px-4 py-3 text-barber-muted">{{ svc.durationMinutes }} min</td>
                 <td class="px-4 py-3 font-medium text-barber-dark">\${{ svc.price }}</td>
                 <td class="px-4 py-3">
@@ -100,6 +113,27 @@ import type { BarberService, ServiceRequest } from '../../core/models';
           <h3 class="mb-5 text-base font-bold text-barber-dark">
             {{ editingId() ? 'Editar servicio' : 'Nuevo servicio' }}
           </h3>
+
+          <!-- Imagen -->
+          <div class="mb-4 text-center">
+            <div class="mx-auto mb-2 h-24 w-24 overflow-hidden rounded-xl bg-stone-100">
+              @if (previewUrl()) {
+                <img [src]="previewUrl()" alt="Preview" class="h-full w-full object-cover" />
+              } @else {
+                <div class="flex h-full items-center justify-center text-2xl text-stone-300">
+                  <i class="fa-regular fa-image"></i>
+                </div>
+              }
+            </div>
+            <label class="cursor-pointer rounded-md bg-stone-100 px-3 py-1.5 text-xs font-medium text-stone-600 transition hover:bg-stone-200">
+              Subir imagen
+              <input type="file" accept="image/*" class="hidden" (change)="onFileSelected($event)" />
+            </label>
+            @if (uploading()) {
+              <p class="mt-1 text-xs text-stone-400">Subiendo…</p>
+            }
+          </div>
+
           <div class="mb-3">
             <label class="mb-1 block text-xs font-medium text-barber-muted">Nombre</label>
             <input [(ngModel)]="form.name" class="w-full rounded-lg border border-stone-200 px-3 py-2 text-sm text-barber-dark placeholder-stone-400 transition focus:border-barber-accent focus:outline-none focus:ring-1 focus:ring-barber-accent" />
@@ -120,8 +154,8 @@ import type { BarberService, ServiceRequest } from '../../core/models';
           </div>
           <div class="flex justify-end gap-2">
             <button (click)="closeForm()" class="rounded-lg border border-stone-200 px-4 py-2 text-sm font-medium text-barber-muted transition hover:bg-stone-50">Cancelar</button>
-            <button (click)="save()" class="rounded-lg bg-barber-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-600">
-              Guardar
+            <button (click)="save()" [disabled]="uploading()" class="rounded-lg bg-barber-accent px-4 py-2 text-sm font-medium text-white transition hover:bg-amber-600 disabled:opacity-60">
+              {{ uploading() ? 'Subiendo…' : 'Guardar' }}
             </button>
           </div>
         </div>
@@ -130,12 +164,16 @@ import type { BarberService, ServiceRequest } from '../../core/models';
   `,
 })
 export class Services implements OnInit {
+  private selectedFile: File | null = null;
+
   protected readonly showForm = signal(false);
   protected readonly editingId = signal<number | null>(null);
   protected readonly deletingId = signal<number | null>(null);
   protected readonly form: ServiceRequest = {
-    name: '', description: '', durationMinutes: 30, price: 0,
+    name: '', description: '', durationMinutes: 30, price: 0, imageUrl: '',
   };
+  protected readonly previewUrl = signal<string | null>(null);
+  protected readonly uploading = signal(false);
 
   constructor(protected service: ServiceService) {}
 
@@ -148,7 +186,10 @@ export class Services implements OnInit {
     this.form.description = '';
     this.form.durationMinutes = 30;
     this.form.price = 0;
+    this.form.imageUrl = '';
+    this.previewUrl.set(null);
     this.editingId.set(null);
+    this.selectedFile = null;
     this.showForm.set(true);
   }
 
@@ -157,7 +198,10 @@ export class Services implements OnInit {
     this.form.description = svc.description;
     this.form.durationMinutes = svc.durationMinutes;
     this.form.price = svc.price;
+    this.form.imageUrl = svc.imageUrl || '';
+    this.previewUrl.set(svc.imageUrl || null);
     this.editingId.set(svc.id);
+    this.selectedFile = null;
     this.showForm.set(true);
   }
 
@@ -165,22 +209,57 @@ export class Services implements OnInit {
     this.showForm.set(false);
   }
 
-  protected save() {
-    const obs = this.editingId()
-      ? this.service.update(this.editingId()!, { ...this.form })
-      : this.service.create({ ...this.form });
+  protected onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
 
-    obs.subscribe(() => {
-      this.closeForm();
-      this.service.loadAll();
-    });
+    this.selectedFile = file;
+
+    // Preview local
+    const reader = new FileReader();
+    reader.onload = () => this.previewUrl.set(reader.result as string);
+    reader.readAsDataURL(file);
   }
 
-  protected toggleActive(svc: BarberService) {
-    const obs = svc.active
-      ? this.service.deactivate(svc.id)
-      : this.service.activate(svc.id);
-    obs.subscribe(() => this.service.loadAll());
+  protected async save() {
+    this.uploading.set(true);
+    try {
+      let imageUrl = this.form.imageUrl;
+
+      if (this.selectedFile) {
+        imageUrl = await this.service.uploadImage(this.selectedFile);
+      }
+
+      const request = { ...this.form, imageUrl };
+
+      if (this.editingId()) {
+        await this.service.update(this.editingId()!, request);
+      } else {
+        await this.service.create(request);
+      }
+
+      this.closeForm();
+      this.service.loadAll();
+    } catch (error) {
+      console.error('Error al guardar servicio:', error);
+      alert('Error al guardar servicio');
+    } finally {
+      this.uploading.set(false);
+    }
+  }
+
+  protected async toggleActive(svc: BarberService) {
+    try {
+      if (svc.active) {
+        await this.service.deactivate(svc.id);
+      } else {
+        await this.service.activate(svc.id);
+      }
+      this.service.loadAll();
+    } catch (error) {
+      console.error('Error al cambiar estado:', error);
+    }
   }
 
   protected confirmDelete(id: number) {
@@ -191,13 +270,15 @@ export class Services implements OnInit {
     this.deletingId.set(null);
   }
 
-  protected doDelete() {
+  protected async doDelete() {
     const id = this.deletingId();
-    if (id) {
-      this.service.delete(id).subscribe(() => {
-        this.deletingId.set(null);
-        this.service.loadAll();
-      });
+    if (!id) return;
+    try {
+      await this.service.delete(id);
+      this.deletingId.set(null);
+      this.service.loadAll();
+    } catch (error) {
+      console.error('Error al eliminar servicio:', error);
     }
   }
 

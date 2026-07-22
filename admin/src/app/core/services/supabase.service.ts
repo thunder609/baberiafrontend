@@ -55,6 +55,44 @@ export class SupabaseService {
   }
 
   /**
+   * Sube una imagen a una carpeta específica de Supabase Storage.
+   * @param file Archivo de imagen.
+   * @param folder Carpeta destino (ej: 'services/', 'barbers/').
+   * @returns URL pública de la imagen.
+   */
+  async uploadImage(file: File, folder: string): Promise<string> {
+    if (!file.type.match('image.*')) {
+      throw new Error('Solo se permiten imágenes (JPG, PNG, etc.)');
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error('La imagen es demasiado grande (máx. 5MB)');
+    }
+
+    const ext = file.name.split('.').pop() || 'jpg';
+    const fileName = `${folder}${Date.now()}.${ext}`;
+
+    const uploadUrl = `${this.supabaseUrl}/storage/v1/object/${this.bucketName}/${fileName}`;
+
+    const response = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'apikey': this.supabaseKey,
+        'Authorization': `Bearer ${this.supabaseKey}`,
+        'Content-Type': file.type,
+      },
+      body: file,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error al subir imagen (${response.status}): ${errorText}`);
+    }
+
+    const publicUrl = `${this.supabaseUrl}/storage/v1/object/public/${this.bucketName}/${fileName}`;
+    return publicUrl;
+  }
+
+  /**
    * Elimina una imagen de Supabase Storage.
    * @param imageUrl URL completa de la imagen.
    */

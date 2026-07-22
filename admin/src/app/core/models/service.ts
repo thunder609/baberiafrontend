@@ -5,6 +5,7 @@ export interface BarberService {
   durationMinutes: number;
   price: number;
   active: boolean;
+  imageUrl: string;
 }
 
 export interface ServiceRequest {
@@ -12,4 +13,5 @@ export interface ServiceRequest {
   description: string;
   durationMinutes: number;
   price: number;
+  imageUrl: string;
 }

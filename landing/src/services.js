@@ -41,7 +41,7 @@ export function renderServicesGrid() {
   }
   grid.innerHTML = state.services
     .map((s, i) => {
-      const img = getServiceImage(s.name);
+      const img = s.imageUrl || getServiceImage(s.name);
       const delay = Math.min(100 + i * 100, 600);
       return `
       <div class="service-card reveal reveal-up delay-${delay} rounded-lg border border-stone-200 bg-white cursor-default overflow-hidden">
