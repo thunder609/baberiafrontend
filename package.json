@@ -11,10 +11,13 @@
     "build": "npm run build:landing && npm run build:admin && npm run assemble",
     "build:landing": "cd landing && npm run build",
     "build:admin": "cd admin && npx ng build --base-href /admin/",
-    "assemble": "rm -rf dist && cp -r landing/dist dist && mkdir -p dist/admin && cp -r admin/dist/frontbarberia/browser/* dist/admin/"
+    "assemble": "rm -rf dist && cp -r landing/dist dist && mkdir -p dist/admin && cp -r admin/dist/frontbarberia/browser/* dist/admin/",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "wrangler": "^4.113.0"
   },
   "dependencies": {
     "pdfkit": "^0.19.1"
