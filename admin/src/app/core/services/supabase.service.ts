@@ -24,7 +24,7 @@ export class SupabaseService {
       throw new Error('La imagen es demasiado grande (máx. 5MB)');
     }
 
-    const fileName = `barber-${barberId}-${Date.now()}.jpg`;
+    const fileName = `barberos/barber-${barberId}-${Date.now()}.jpg`;
 
     // URL correcta de Supabase Storage
     const uploadUrl = `${this.supabaseUrl}/storage/v1/object/${this.bucketName}/${fileName}`;
@@ -97,10 +97,13 @@ export class SupabaseService {
    * @param imageUrl URL completa de la imagen.
    */
   async deleteBarberImage(imageUrl: string): Promise<void> {
-    const fileName = imageUrl.split('/').pop();
-    if (!fileName) throw new Error('URL de imagen inválida');
+    // Extraer la ruta completa después de "public/Barberia/"
+    const marker = `/public/${this.bucketName}/`;
+    const idx = imageUrl.indexOf(marker);
+    if (idx === -1) throw new Error('URL de imagen inválida');
+    const filePath = imageUrl.substring(idx + marker.length);
 
-    const deleteUrl = `${this.supabaseUrl}/storage/v1/object/${this.bucketName}/${fileName}`;
+    const deleteUrl = `${this.supabaseUrl}/storage/v1/object/${this.bucketName}/${filePath}`;
 
     const response = await fetch(deleteUrl, {
       method: 'DELETE',
